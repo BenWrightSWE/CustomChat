@@ -39,7 +39,7 @@ export default function NavBar() {
 
     return (
         <nav className="flex items-center justify-between h-16 px-4 border-b bg-background z-50 text-lg font-header">
-                <a className="flex items-center gap-2 mr-6" href="/webapp/public">
+                <a className="flex items-center gap-2 mr-6" href="/">
                     <img alt="logo" width="34" height="34" src="/cc_logo.png"/>
                     <span className="font-semibold text-2xl">Custom Chat</span>
                 </a>
@@ -62,8 +62,8 @@ export default function NavBar() {
                                 <DropdownMenu.Item>Settings</DropdownMenu.Item>
                                 <DropdownMenu.Item onClick={() => logout(router)}>Log Out</DropdownMenu.Item></>
                                 ):(
-                                <><DropdownMenu.Item><Link href="/auth/login">Log In</Link></DropdownMenu.Item>
-                                <DropdownMenu.Item><Link href="/auth/sign-up">Sign up</Link></DropdownMenu.Item></>
+                                <><DropdownMenu.Item><Link href="/login">Log In</Link></DropdownMenu.Item>
+                                <DropdownMenu.Item><Link href="/sign-up">Sign up</Link></DropdownMenu.Item></>
                             )}
                         </DropdownMenu.Content>
                     </DropdownMenu.Root>

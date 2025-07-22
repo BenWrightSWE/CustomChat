@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "@/app/globals.css";
 import "@radix-ui/themes/styles.css";
-import NavBar from "@/components/main/NavBar";
+import NavBarAuth from "@/components/auth/NavBarAuth";
 import ThemeWrapper from "@/components/ThemeWrapper";
 import {AppearanceProvider} from "@/lib/contexts/AppearanceContext";
 
@@ -23,7 +23,7 @@ export default function RootLayout({ children, }: Readonly<{
                 <AppearanceProvider>
                     <ThemeWrapper>
                         <header className={"shrink z-50"}>
-                            <NavBar />
+                            <NavBarAuth />
                         </header>
                         <main className={""}>
                             {children}

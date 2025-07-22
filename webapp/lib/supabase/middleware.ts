@@ -36,10 +36,10 @@ export async function updateSession(request: NextRequest) {
   );
 
   // Do not run code between createServerClient and
-  // supabase.auth.getUser(). A simple mistake could make it very hard to debug
+  // supabase.(auth).getUser(). A simple mistake could make it very hard to debug
   // issues with users being randomly logged out.
 
-  // IMPORTANT: DO NOT REMOVE auth.getUser()
+  // IMPORTANT: DO NOT REMOVE (auth).getUser()
 
   const {
     data: { user },
@@ -49,11 +49,11 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname !== "/" &&
     !user &&
     !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/auth")
+    !request.nextUrl.pathname.startsWith("/(auth)")
   ) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone();
-    url.pathname = "/auth/login";
+    url.pathname = "/(auth)/login";
     return NextResponse.redirect(url);
   }
 
