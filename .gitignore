@@ -1,0 +1,66 @@
+
+# Root ignore files
+
+notes.txt
+
+# backend ignore files
+
+backend/.idea
+
+
+# web app ignore files
+
+# added
+
+webapp/components/given
+webapp/components/ui
+webapp/lib/utils.ts
+
+
+
+# preloaded
+
+# dependencies
+webapp/node_modules
+webapp/.next
+webapp/.pnp
+webapp/.pnp.*
+webapp/.yarn/*
+!webapp/.yarn/patches
+!webapp/.yarn/plugins
+!webapp/.yarn/releases
+!webapp/.yarn/versions
+
+# testing
+webapp/coverage
+
+# next.js
+webapp/.next/
+webapp/out/
+
+# production
+webapp/build
+
+# misc
+webapp/.DS_Store
+webapp/*.pem
+
+# debug
+webapp/npm-debug.log*
+webapp/yarn-debug.log*
+webapp/yarn-error.log*
+webapp/.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+webapp/.env.dev
+webapp/.env.stage
+webapp/.env.prod
+webapp/.env.local
+webapp/.env
+
+# vercel
+webapp/.vercel
+
+# typescript
+webapp/*.tsbuildinfo
+webapp/next-env.d.ts
