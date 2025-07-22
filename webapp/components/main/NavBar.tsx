@@ -30,7 +30,7 @@ export default function NavBar() {
 
     const onAppearanceChange = () => {
         setAppearance(appearance === 'light' ? 'dark' : 'light');
-        updateAppearanceCookie(appearance === 'light' ? 'light' : 'dark');
+        updateAppearanceCookie(appearance === 'light' ? 'dark' : 'light');
     }
 
     const onNavChange = () => {
