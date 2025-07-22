@@ -10,14 +10,6 @@ backend/.idea
 
 # web app ignore files
 
-# added
-
-webapp/components/given
-webapp/components/ui
-webapp/lib/utils.ts
-
-
-
 # preloaded
 
 # dependencies

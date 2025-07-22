@@ -38,19 +38,20 @@ export default function NavBar() {
     }
 
     return (
-        <nav className="flex items-center justify-between h-16 px-4 border-b bg-background z-50 text-lg font-header">
-                <a className="flex items-center gap-2 mr-6" href="/">
-                    <img alt="logo" width="34" height="34" src="/cc_logo.png"/>
-                    <span className="font-semibold text-2xl">Custom Chat</span>
+        <nav className={"flex items-center justify-between h-16 px-4 border-b bg-background z-50 text-lg font-header" +
+                        " shadow-md"}>
+                <a className={"flex items-center gap-2 mr-6"} href="/">
+                    <img alt={"logo"} width={"34"} height={"34"} src={"/cc_logo.png"}/>
+                    <span className={"font-semibold text-2xl"}>Custom Chat</span>
                 </a>
 
-                <div className="hidden lg:flex items-center gap-6">
-                    <a className="cursor-pointer font-medium text-muted-foreground" type="button">Overview</a>
-                    <a className="cursor-pointer font-medium text-muted-foreground" type="button">Docs</a>
-                    <a className="cursor-pointer font-medium text-muted-foreground" type="button">Pricing</a>
-                    <a className="cursor-pointer font-medium text-muted-foreground" type="button">About Us</a>
+                <div className={"hidden lg:flex items-center gap-6"}>
+                    <a className={"cursor-pointer font-medium text-muted-foreground"} type={"button"}>Overview</a>
+                    <a className={"cursor-pointer font-medium text-muted-foreground"} type={"button"}>Docs</a>
+                    <a className={"cursor-pointer font-medium text-muted-foreground"} type={"button"}>Pricing</a>
+                    <a className={"cursor-pointer font-medium text-muted-foreground"} type={"button"}>About Us</a>
                 </div>
-                <div className="hidden lg:flex items-center gap-2 ml-auto">
+                <div className={"hidden lg:flex items-center gap-2 ml-auto"}>
                     <Button onClick={onAppearanceChange}>{appearance == "light" ? <SunIcon/> : <MoonIcon/>}</Button>
                     <DropdownMenu.Root>
                         <DropdownMenu.Trigger>
@@ -69,28 +70,45 @@ export default function NavBar() {
                     </DropdownMenu.Root>
                 </div>
 
-                <div className="lg:hidden ml-auto flex items-center">
+                <div className={"lg:hidden ml-auto flex items-center"}>
                     <Button onClick={onNavChange}>{isNav ? <Cross1Icon/> : <HamburgerMenuIcon/>}</Button>
                 </div>
 
                 {isNav ?
-                    <div className="absolute top-16 left-0 w-full bg-background shadow-md px-6 py-4 z-40 flex flex-col items-center gap-4 lg:hidden">
-                        <a className="text-center cursor-pointer font-medium text-muted-foreground" type="button">Overview</a>
-                        <a className="text-center cursor-pointer font-medium text-muted-foreground" type="button">Docs</a>
-                        <a className="text-center cursor-pointer font-medium text-muted-foreground" type="button">Pricing</a>
-                        <a className="text-center cursor-pointer font-medium text-muted-foreground" type="button">About Us</a>
-                        <div className={"flex flex-row items-center gap-3 border-b-2 pl-10 pr-10 mt-2 mb-2"}><PersonIcon/><span className={""}>Profile</span></div>
-                        <div className={"flex flex-col w-full gap-5 sm:flex-row justify-center items-center "}>
+                    <div className={"absolute top-16 left-0 w-full bg-background shadow-md px-6 py-4 z-40 flex flex-col" +
+                                    " items-center gap-4 lg:hidden"}>
+                        <a className={"text-center cursor-pointer font-medium text-muted-foreground"} type={"button"}>
+                            Overview</a>
+                        <a className={"text-center cursor-pointer font-medium text-muted-foreground"} type={"button"}>
+                            Docs</a>
+                        <a className={"text-center cursor-pointer font-medium text-muted-foreground"} type={"button"}>
+                            Pricing</a>
+                        <a className={"text-center cursor-pointer font-medium text-muted-foreground"} type={"button"}>
+                            About Us</a>
+                        <div className={"flex flex-row items-center gap-3 border-b-2 pl-10 pr-10 mt-2 mb-2"}>
+                            <PersonIcon/><span className={""}>Profile</span>
+                        </div>
+                        <div className={"flex flex-col w-full gap-5 sm:flex-row justify-center items-center"}>
                             {user ? (
                                 <><Button size={"3"} variant={"surface"} className={""}>Dashboard</Button>
                                     <Button size={"3"} variant={"surface"} className={""}>Settings</Button>
                                     <Button size={"3"} variant={"surface"} className={""} onClick={() => logout(router)}>
                                         Log Out</Button>
-                                    <Button size={"3"} className={"w-full pl-5 pr-5"} onClick={onAppearanceChange}>{appearance == "light" ? <SunIcon/> : <MoonIcon/>}</Button></>
+                                    <Button size={"3"} className={"w-full pl-5 pr-5"} onClick={onAppearanceChange}>
+                                        {appearance == "light" ? <SunIcon/> : <MoonIcon/>}
+                                    </Button></>
                             ):(
-                                <><Button size={"4"} variant={"surface"} className={""}><Link href="/auth/login">Log In</Link></Button>
-                                    <Button size={"4"} variant={"surface"} className={""}><Link href="/auth/sign-up">Sign up</Link></Button>
-                                    <Button size={"4"} className={"w-full pl-5 pr-5"} onClick={onAppearanceChange}>{appearance == "light" ? <SunIcon/> : <MoonIcon/>}</Button></>
+                                <>
+                                    <Button size={"4"} variant={"surface"} className={""}>
+                                        <Link href="/login">Log In</Link>
+                                    </Button>
+                                    <Button size={"4"} variant={"surface"} className={""}>
+                                        <Link href="/sign-up">Sign up</Link>
+                                    </Button>
+                                    <Button size={"4"} className={"w-full pl-5 pr-5"} onClick={onAppearanceChange}>
+                                        {appearance == "light" ? <SunIcon/> : <MoonIcon/>}
+                                    </Button>
+                                </>
                             )}
                         </div>
                     </div> : <></>
