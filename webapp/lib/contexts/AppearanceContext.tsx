@@ -15,7 +15,6 @@ export function AppearanceProvider({ children }: { children: React.ReactNode }) 
 
     useEffect(() => {
         setAppearance(getAppearanceCookie());
-        console.log(getAppearanceCookie());
     }, []);
 
     return (

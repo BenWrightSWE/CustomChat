@@ -1,17 +1,18 @@
 "use client";
 
-import { createClient } from "@/lib/supabase/client";
 import { Button } from "@radix-ui/themes";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 export function LogoutButton() {
   const router = useRouter();
+  const { logOut } = useAuth();
 
+  /*
   const logout = async () => {
-    const supabase = createClient();
     await supabase.auth.signOut();
     router.push("/login");
-  };
+  };*/
 
-  return <Button onClick={logout}>Logout</Button>;
+  return <Button onClick={async () => await logOut}>Logout</Button>;
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { cn } from "@/lib/utils/utils";
-import { createClient } from "@/lib/supabase/client";
 import {Button} from "@radix-ui/themes";
 import {
   Card,
@@ -14,19 +13,26 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useState } from "react";
+import supabase from "@/lib/utils/supabase";
+import { useAuth } from "@/lib/contexts/AuthContext";
+import {reset} from "next/dist/lib/picocolors";
 
 export function ForgotPasswordForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
-  const [email, setEmail] = useState("");
+
+  const [email, setEmail] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { forgotPassword } = useAuth();
+
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    const supabase = createClient();
+    const result = await forgotPassword(email);
+    /*
     setIsLoading(true);
     setError(null);
 
@@ -41,7 +47,7 @@ export function ForgotPasswordForm({
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
       setIsLoading(false);
-    }
+    } */
   };
 
   return (

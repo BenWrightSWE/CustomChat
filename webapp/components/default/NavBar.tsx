@@ -3,28 +3,18 @@
 import { updateAppearanceCookie } from "../../lib/utils/cookies"
 import { Button, DropdownMenu } from "@radix-ui/themes";
 import { PersonIcon, MoonIcon, SunIcon, HamburgerMenuIcon, Cross1Icon } from "@radix-ui/react-icons";
-import { useEffect, useState } from "react";
-import { logout, supabase } from "@/lib/utils/supabase";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {useAppearance} from "@/lib/contexts/AppearanceContext";
+import {useAuth} from "@/lib/contexts/AuthContext";
 
 export default function NavBar() {
 
     const router = useRouter();
 
-    const [user, setUser] = useState(null);
-
-    const {appearance, setAppearance} = useAppearance();
-
-    useEffect(() => {
-        const getUser = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            setUser(user);
-        }
-
-        getUser();
-    }, [])
+    const { appearance, setAppearance } = useAppearance();
+    const { user, logOut } = useAuth();
 
     const [isNav, setIsNav] = useState(false);
 
@@ -35,6 +25,10 @@ export default function NavBar() {
 
     const onNavChange = () => {
         setIsNav(!isNav);
+    }
+
+    const handleSignOut = async () => {
+        await logOut();
     }
 
     return (
@@ -59,12 +53,16 @@ export default function NavBar() {
                         </DropdownMenu.Trigger>
                         <DropdownMenu.Content>
                             {user ? (
-                                <><DropdownMenu.Item>Dashboard</DropdownMenu.Item>
-                                <DropdownMenu.Item>Settings</DropdownMenu.Item>
-                                <DropdownMenu.Item onClick={() => logout(router)}>Log Out</DropdownMenu.Item></>
+                                <>
+                                    <DropdownMenu.Item><Link href={"/dashboard"}>Dashboard</Link></DropdownMenu.Item>
+                                    <DropdownMenu.Item>Settings</DropdownMenu.Item>
+                                    <DropdownMenu.Item onSelect={handleSignOut}>Log Out</DropdownMenu.Item>
+                                </>
                                 ):(
-                                <><DropdownMenu.Item><Link href="/login">Log In</Link></DropdownMenu.Item>
-                                <DropdownMenu.Item><Link href="/sign-up">Sign up</Link></DropdownMenu.Item></>
+                                <>
+                                    <DropdownMenu.Item><Link href={"/login"}>Log In</Link></DropdownMenu.Item>
+                                    <DropdownMenu.Item><Link href={"/sign-up"}>Sign up</Link></DropdownMenu.Item>
+                                </>
                             )}
                         </DropdownMenu.Content>
                     </DropdownMenu.Root>
@@ -90,13 +88,15 @@ export default function NavBar() {
                         </div>
                         <div className={"flex flex-col w-full gap-5 sm:flex-row justify-center items-center"}>
                             {user ? (
-                                <><Button size={"3"} variant={"surface"} className={""}>Dashboard</Button>
+                                <>
+                                    <Button size={"3"} variant={"surface"} className={""}>Dashboard</Button>
                                     <Button size={"3"} variant={"surface"} className={""}>Settings</Button>
-                                    <Button size={"3"} variant={"surface"} className={""} onClick={() => logout(router)}>
+                                    <Button size={"3"} variant={"surface"} className={""} onClick={handleSignOut}>
                                         Log Out</Button>
                                     <Button size={"3"} className={"w-full pl-5 pr-5"} onClick={onAppearanceChange}>
                                         {appearance == "light" ? <SunIcon/> : <MoonIcon/>}
-                                    </Button></>
+                                    </Button>
+                                </>
                             ):(
                                 <>
                                     <Button size={"4"} variant={"surface"} className={""}>

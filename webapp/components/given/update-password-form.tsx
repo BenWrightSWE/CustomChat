@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 export function UpdatePasswordForm({
   className,
@@ -23,10 +24,13 @@ export function UpdatePasswordForm({
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { updatePassword } = useAuth();
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    const supabase = createClient();
+    const result = await updatePassword(password);
+    //const supabase = createClient();
+    /*
     setIsLoading(true);
     setError(null);
 
@@ -40,6 +44,7 @@ export function UpdatePasswordForm({
     } finally {
       setIsLoading(false);
     }
+     */
   };
 
   return (

@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useAuth } from "@/lib/contexts/AuthContext";
 
 export function SignUpForm({
   className,
@@ -29,10 +30,13 @@ export function SignUpForm({
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const phoneRegex = new RegExp("^\\s*(?:\\+?(\\d{1,3}))?[-. (]*(\\d{3})[-. )]*(\\d{3})[-. ]*(\\d{4})\\s*$");
+  const { signUp } = useAuth();
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    const supabase = createClient();
+    const result = await signUp(email, password);
+    //const supabase = createClient();
+    /*
     setIsLoading(true);
     setError(null);
 
@@ -64,6 +68,7 @@ export function SignUpForm({
     } finally {
       setIsLoading(false);
     }
+     */
   };
 
   return (
