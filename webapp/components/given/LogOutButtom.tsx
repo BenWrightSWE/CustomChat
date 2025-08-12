@@ -4,7 +4,7 @@ import { Button } from "@radix-ui/themes";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/contexts/AuthContext";
 
-export function LogoutButton() {
+export function LogOutButtom() {
   const router = useRouter();
   const { logOut } = useAuth();
 

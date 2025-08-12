@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "@/app/globals.css";
 import "@radix-ui/themes/styles.css";
 import NavBarAuth from "@/components/auth/NavBarAuth";
-import ThemeWrapper from "@/components/ThemeWrapper";
+import ThemeWrapper from "@/components/general/ThemeWrapper";
 import {AppearanceProvider} from "@/lib/contexts/AppearanceContext";
 import {AuthProvider} from "@/lib/contexts/AuthContext";
 
@@ -21,7 +21,7 @@ export default function RootLayout({ children, }: Readonly<{
             <body>
                 <AuthProvider>
                     <AppearanceProvider>
-                        <ThemeWrapper>
+                        <ThemeWrapper fonts={{header: true, body: false}}>
                             <header className={"shrink z-50"}>
                                 <NavBarAuth />
                             </header>

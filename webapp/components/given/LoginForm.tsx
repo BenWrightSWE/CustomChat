@@ -1,7 +1,6 @@
 "use client";
 
 import { cn } from "@/lib/utils/utils";
-import { createClient } from "@/lib/supabase/client";
 import { Button } from "@radix-ui/themes";
 import {
   Card,
@@ -9,13 +8,14 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from "@/components/ui/Card";
+import { Input } from "@/components/ui/Input";
+import { Label } from "@/components/ui/Label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "@/lib/contexts/AuthContext";
+import {updatePasswordAction} from "@/lib/actions/auth-actions";
 
 export function LoginForm({
   className,
@@ -24,17 +24,12 @@ export function LoginForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { user, logIn } = useAuth();
+  const { logIn, isLoading, checkUser } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = await logIn(email, password);
-    
-    if (result.error) {
-      console.error("Login failed:", result.error);
-    }
+    await logIn(email, password);
   };
 
   return (

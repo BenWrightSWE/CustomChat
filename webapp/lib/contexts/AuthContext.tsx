@@ -2,8 +2,10 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import supabase from "@/lib/utils/supabase";
 import { User, AuthError } from "@supabase/auth-js";
+import { signUpAction, logInAction, forgotPasswordAction, updatePasswordAction,checkUserAction } from "@/lib/actions/auth-actions";
+import { CreateUserParams } from "@/lib/types";
+import supabase from "@/lib/utils/supabase";
 
 interface AuthContextType {
     user: User | null;
@@ -19,37 +21,40 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode}) => {
     const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
 
 
     useEffect(() => {
         const getInitialUser = async () => {
+            setIsLoading(true);
+
             try {
                 const { data: { user }, error} = await supabase.auth.getUser();
+
                 if (error) {
                     console.error("Error getting session:", error);
                 } else {
                     setUser(user);
                 }
-            } catch (error) {
-                console.error("Error in getInitialSession:", error);
-            } finally {
-                setLoading(false);
+            } catch (unexpectedError) {
+                console.error("Unexpected error getting session:", unexpectedError);
             }
+
+            setIsLoading(false);
         }
 
         getInitialUser();
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
             (event, session) => {
-                setLoading(false);
+                setIsLoading(false);
 
                 switch (event) {
                     case 'SIGNED_IN':
                         setUser(session?.user ?? null);
                         if(window.location.pathname === '/login'){
-                            window.location.href = '/dashboard';
+                            window.location.href = '/';
                         }
                         break;
                     case 'TOKEN_REFRESHED':
@@ -71,120 +76,88 @@ export const AuthProvider = ({ children }: { children: ReactNode}) => {
         };
     }, [router]);
 
-    const signUp = async (email: string, password: string, metadata = {}) => {
-        try {
-            setLoading(true);
+    const signUp = async (userData: CreateUserParams) => {
+        setIsLoading(true);
 
-            const { data, error } = await supabase.auth.signUp({
-                email,
-                password,
-                options: {
-                    data: metadata
-                }
-            });
+        const errorMessage = await signUpAction(userData);
 
-            if (error) {
-                console.error("Sign up error:", error.message);
-                return { error };
-            }
-
-            return { error: null };
-        } catch (error) {
-            console.error("Unexpected sign up error:", error);
-            return { error: error as AuthError };
-        } finally {
-            router.push("/auth/sign-up-success");
-            setLoading(false);
+        if (errorMessage) {
+                console.error("Error during sign-up:", errorMessage);
+        } else {
+            window.location.href = "/auth/sign-up-success";
         }
+
+        setIsLoading(false);
     };
 
-    const logIn = async (email: string, password: string, metadata = {}) => {
-        try {
-            setLoading(true);
+    const logIn = async (email: string, password: string) => {
+        setIsLoading(true);
 
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email,
-                password,
-            });
+        const errorMessage = await logInAction(email, password);
 
-            if (error) {
-                console.error("Login error:", error.message);
-                return { error };
-            }
-
-            return { error: null };
-        } catch (error) {
-            console.error("Unexpected log in error:", error);
-            return { error: error as AuthError };
-        } finally {
-            setLoading(false);
+        if (errorMessage) {
+            console.error("Error during log-in:", errorMessage.message);
+        } else {
+            window.location.replace("/");
         }
+
+        setIsLoading(false);
     };
 
+    /*
+        Note for self: this is ran server side so that Supabase can properly clean up all browser storage and trigger
+        all necessary events.
+     */
     const logOut = async () => {
-        try {
-            setLoading(true);
+        setIsLoading(true);
 
-            const { error } = await supabase.auth.signOut();
+        try {
+            const {error} = await supabase.auth.signOut();
 
             if (error) {
-                console.error("Logout error:", error.message);
-                return error;
+                console.error("Error during log-out:", error.message);
             }
-
-            return { error: null };
-        } catch (error) {
-            console.error("Unexpected log out error:", error);
-            return { error: error as AuthError };
-        } finally {
-            setLoading(false);
+        } catch (unexpectedError) {
+            console.error("Unexpected error during log-out:", unexpectedError);
         }
+
+        setIsLoading(false);
     };
 
     const forgotPassword = async (email: string) => {
-        setLoading(true);
-        try {
-            const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: 'auth/update-password',
-            });
+        setIsLoading(true);
 
-            if (error) {
-                console.error("Forgot password error:", error.message);
-                return error;
-            }
+        const errorMessage = await forgotPasswordAction(email);
 
-            return { error: null };
-        } catch (error) {
-            console.error("Unexpected forgot password error:", error);
-            return { error: error as AuthError };
-        } finally {
-            setLoading(false);
+        if (errorMessage) {
+            console.error("Error during forgot password:", errorMessage.message);
         }
+        setIsLoading(false);
     };
 
     const updatePassword = async (password: string)=> {
-        setLoading(true);
-        try {
-            const { error } = await supabase.auth.updateUser({ password });
+        setIsLoading(true);
 
-            if (error) {
-                console.error("Forgot password error:", error.message);
-                return error;
-            }
+        const errorMessage = await updatePasswordAction(password);
 
-            return { error: null };
-        } catch (error) {
-            console.error("Unexpected password update error:", error);
-            return { error: error as AuthError };
-        } finally {
-            setLoading(false);
+        if (errorMessage) {
+            console.error("Error during password update", errorMessage.message);
+        }
+        setIsLoading(false);
+    }
+
+    const checkUser = async () => {
+        const errorMessage = await checkUserAction();
+
+        if (errorMessage) {
+            console.error("Error during check user", errorMessage.message);
         }
     }
 
     const value = {
         // State
         user,
-        loading,
+        isLoading,
 
         // Methods
         signUp,
@@ -192,6 +165,7 @@ export const AuthProvider = ({ children }: { children: ReactNode}) => {
         logOut,
         forgotPassword,
         updatePassword,
+        checkUser
     };
 
     return (
@@ -206,5 +180,5 @@ export const useAuth = () => {
     if (context == undefined) {
         throw new Error("useAuth must be used within AuthProvider");
     }
-    return context
+    return context;
 }
