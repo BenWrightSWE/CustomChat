@@ -1,0 +1,33 @@
+
+# General
+**/.idea
+**/node_modules
+**/.env
+
+# Frontend
+frontend/.next
+frontend/out/
+
+frontend/build
+
+frontend/.DS_Store
+frontend/*.pem
+
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/.pnpm-debug.log*
+
+frontend/.vercel
+
+frontend/*.tsbuildinfo
+frontend/next-env.d.ts
+
+# Supabase
+supabase/.branches
+supabase/.temp
+
+# dotenvx
+.env.keys
+.env.local
+.env.*.local
