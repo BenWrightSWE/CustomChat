@@ -3,7 +3,6 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
 --
 CREATE TABLE users (
     user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-    is_admin BOOLEAN DEFAULT FALSE,
     first_name TEXT NOT NULL,
     last_name TEXT NOT NULL,
     company TEXT,

@@ -21,6 +21,7 @@ At the moment, this app is in development. Thank you for understanding.
     * [Contributors & Acknowledgements](#contrib-acknow)
     * [Contribution Guidelines](#contrib-guidelines)
     * [License](#license)
+    * [AI Use](#ai-use)
 
 # <ins>Use Guide</ins>
 
@@ -67,6 +68,15 @@ For this project I am using the AGPL-3.0 license. Please respect this.
 
 If you want further information regarding the license go to the LICENSE file.
 
+## <a name="#ai-use">AI Use</a>
 
+AI wasn't used for a majority of this project
 
+I used a previous project to gain an understanding of how some tools interacted and as an idea of where to go.
+
+From there, I used AI to help me understand how different tools connected, understanding what things were used in which
+ways, and just for general understanding. I used it in this way so that I would genuinely comprehend the code I am writing
+and what each library or framework I was using, was doing.
+
+The main AI used for this was Claude, but ChatGBT was used as well.
 
