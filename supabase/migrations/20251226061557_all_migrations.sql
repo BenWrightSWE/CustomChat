@@ -24,7 +24,8 @@ CREATE TABLE bots (
 CREATE TABLE feedback (
     fb_id BIGSERIAL PRIMARY KEY,
     bot_id BIGINT REFERENCES bots(bot_id) ON DELETE CASCADE,
-    fb_date DATETIME NOT NULL,
+    fb_date DATE NOT NULL,
+    fb_time TIME NOT NULL
     is_neg BOOLEAN, -- true = negative, false = positive, null = not answered
     fb_desc TEXT,
     use_log TEXT[] -- AI and user transcription

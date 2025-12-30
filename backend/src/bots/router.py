@@ -10,7 +10,7 @@ def create_bot(bot_data: BotCreate, current_user: dict = Depends(get_current_use
     try:
         return crud.create_bot(current_user["id"], bot_data)
     except Exception as e:
-        print(f"Error fetching bots: {e}")
+        print(f"Error creating bot: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 @router.get("/bots", response_model=list[BotResponse])

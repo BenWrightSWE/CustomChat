@@ -1,0 +1,70 @@
+from fastapi import APIRouter, HTTPException, Depends
+from .schemas import FeedbackCreate, FeedbackResponse
+from . import crud
+from ..bots import crud as bot_crud
+from backend.auth.security import get_current_user
+
+router = APIRouter(prefix="/feedback", tags=["Feedback"])
+
+
+@router.post("/bots/{bot_id}/feedback", response_model=FeedbackResponse, status_code=201)
+def create_feedback(
+    bot_id: int,
+    fb_data: FeedbackCreate,
+    current_user: dict = Depends(get_current_user)
+):
+    try:
+        bot = bot_crud.get_bot_by_id(current_user["id"], bot_id)
+        if not bot:
+            raise HTTPException(status_code=404, detail="Bot not found")
+
+        return crud.create_feedback(bot_id, fb_data)
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error creating feedback: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@router.get("/bots/{bot_id}/feedback", response_model=list[FeedbackResponse])
+def get_all_feedback(
+    bot_id: int,
+    current_user: dict = Depends(get_current_user)  # Added!
+):
+    try:
+        bot = bot_crud.get_bot_by_id(current_user["id"], bot_id)
+        if not bot:
+            raise HTTPException(status_code=404, detail="Bot not found")
+
+        return crud.get_all_feedback(bot_id)
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error fetching feedback: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@router.get("/bots/{bot_id}/feedback/{fb_id}", response_model=FeedbackResponse)
+def get_feedback_by_id(
+    bot_id: int,
+    fb_id: int,
+    current_user: dict = Depends(get_current_user)
+):
+    try:
+        bot = bot_crud.get_bot_by_id(current_user["id"], bot_id)
+        if not bot:
+            raise HTTPException(status_code=404, detail="Bot not found")
+
+        feedback = crud.get_feedback_by_id(bot_id, fb_id)
+        if not feedback:
+            raise HTTPException(status_code=404, detail="Feedback not found")
+
+        return feedback
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error fetching feedback: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
