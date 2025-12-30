@@ -1,11 +1,10 @@
 from fastapi import APIRouter, HTTPException, Depends
-from .schemas import FeedbackCreate, FeedbackResponse
-from . import crud
-from ..bots import crud as bot_crud
-from backend.auth.security import get_current_user
+from backend.app.schemas.feedback import FeedbackCreate, FeedbackResponse
+from backend.app.crud import feedback as crud
+from backend.app.crud import bots as bot_crud
+from backend.app.core.security import get_current_user
 
-router = APIRouter(prefix="/feedback", tags=["Feedback"])
-
+router = APIRouter()
 
 @router.post("/bots/{bot_id}/feedback", response_model=FeedbackResponse, status_code=201)
 def create_feedback(
@@ -19,7 +18,6 @@ def create_feedback(
             raise HTTPException(status_code=404, detail="Bot not found")
 
         return crud.create_feedback(bot_id, fb_data)
-
     except HTTPException:
         raise
     except Exception as e:

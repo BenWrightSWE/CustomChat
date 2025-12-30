@@ -1,5 +1,5 @@
-from .schemas import BotCreate, BotUpdate
-from ..db.supabase import supabase_admin
+from backend.app.schemas.bots import BotCreate, BotUpdate
+from backend.app.core.supabase import supabase_admin
 
 
 def create_bot(user_id: str, bot_data: BotCreate):

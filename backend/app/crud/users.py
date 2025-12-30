@@ -1,5 +1,5 @@
-from .schemas import UserCreate, UserUpdate
-from ..db.supabase import supabase_admin
+from backend.app.schemas.users import UserCreate, UserUpdate
+from backend.app.core.supabase import supabase_admin
 
 
 def create_user(user_id: str, user_data: UserCreate):

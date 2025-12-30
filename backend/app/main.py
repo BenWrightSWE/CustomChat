@@ -1,11 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from db.supabase import supabase
-from users import router as users_router
-from bots import router as bots_router
-from feedback import router as feedback_router
+from backend.app.core import supabase
+from backend.app.api.v1.router import api_router
 
-app = FastAPI()
+app = FastAPI(title="CustomChat API", version="1.0.0")
 
 
 app.add_middleware(
@@ -16,6 +14,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(api_router, prefix="/api/v1")
 
 @app.get("/")
 async def ping():

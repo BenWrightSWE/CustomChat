@@ -1,9 +1,9 @@
 from fastapi import APIRouter, HTTPException, Depends
-from .schemas import BotCreate, BotUpdate, BotResponse
-from . import crud
-from backend.auth.security import get_current_user
+from backend.app.schemas.bots import BotCreate, BotUpdate, BotResponse
+from backend.app.crud import bots as crud
+from backend.app.core.security import get_current_user
 
-router = APIRouter(prefix="/bots", tags=["Bots"])
+router = APIRouter()
 
 @router.post("/bots", response_model=BotResponse)
 def create_bot(bot_data: BotCreate, current_user: dict = Depends(get_current_user)):

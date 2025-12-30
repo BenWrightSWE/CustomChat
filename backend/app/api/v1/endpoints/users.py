@@ -1,10 +1,9 @@
 from fastapi import APIRouter, HTTPException, Depends
-from .schemas import UserUpdate, UserResponse
-from . import crud
-from backend.auth.security import get_current_user
+from backend.app.schemas.users import UserUpdate, UserResponse
+from backend.app.crud import users as crud
+from backend.app.core.security import get_current_user
 
-router = APIRouter(prefix="/users", tags=["Users"])
-
+router = APIRouter()
 
 # route to get a user's data
 @router.get("/me", response_model=UserResponse)
