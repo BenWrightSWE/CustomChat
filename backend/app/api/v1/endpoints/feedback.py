@@ -2,21 +2,18 @@ from fastapi import APIRouter, HTTPException, Depends
 from backend.app.schemas.feedback import FeedbackCreate, FeedbackResponse
 from backend.app.crud import feedback as crud
 from backend.app.crud import bots as bot_crud
-from backend.app.core.security import get_current_user
+from backend.app.core.security import get_current_user, verify_bot_ownership
 
 router = APIRouter()
 
-@router.post("/bots/{bot_id}/feedback", response_model=FeedbackResponse, status_code=201)
+
+@router.post(
+    "/bots/{bot_id}/feedback", response_model=FeedbackResponse, status_code=201
+)
 def create_feedback(
-    bot_id: int,
-    fb_data: FeedbackCreate,
-    current_user: dict = Depends(get_current_user)
+    bot_id: int, fb_data: FeedbackCreate, _: dict = Depends(verify_bot_ownership)
 ):
     try:
-        bot = bot_crud.get_bot_by_id(current_user["id"], bot_id)
-        if not bot:
-            raise HTTPException(status_code=404, detail="Bot not found")
-
         return crud.create_feedback(bot_id, fb_data)
     except HTTPException:
         raise
@@ -26,17 +23,9 @@ def create_feedback(
 
 
 @router.get("/bots/{bot_id}/feedback", response_model=list[FeedbackResponse])
-def get_all_feedback(
-    bot_id: int,
-    current_user: dict = Depends(get_current_user)  # Added!
-):
+def get_all_feedback(bot_id: int, _: dict = Depends(verify_bot_ownership)):
     try:
-        bot = bot_crud.get_bot_by_id(current_user["id"], bot_id)
-        if not bot:
-            raise HTTPException(status_code=404, detail="Bot not found")
-
         return crud.get_all_feedback(bot_id)
-
     except HTTPException:
         raise
     except Exception as e:
@@ -46,15 +35,9 @@ def get_all_feedback(
 
 @router.get("/bots/{bot_id}/feedback/{fb_id}", response_model=FeedbackResponse)
 def get_feedback_by_id(
-    bot_id: int,
-    fb_id: int,
-    current_user: dict = Depends(get_current_user)
+    bot_id: int, fb_id: int, _: dict = Depends(verify_bot_ownership)
 ):
     try:
-        bot = bot_crud.get_bot_by_id(current_user["id"], bot_id)
-        if not bot:
-            raise HTTPException(status_code=404, detail="Bot not found")
-
         feedback = crud.get_feedback_by_id(bot_id, fb_id)
         if not feedback:
             raise HTTPException(status_code=404, detail="Feedback not found")

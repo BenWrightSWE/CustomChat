@@ -1,9 +1,10 @@
 import os
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Path
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
 from jwt import PyJWKClient
 from dotenv import load_dotenv
+from backend.app.crud import bots as bot_crud
 
 load_dotenv()
 
@@ -48,3 +49,16 @@ def get_current_user(
             detail="Invalid authentication credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+
+# AUTH
+
+
+def verify_bot_ownership(
+    bot_id: int = Path(...),
+    current_user: dict = Depends(get_current_user)
+):
+    bot = bot_crud.get_bot_by_id(current_user["id"], bot_id)
+    if not bot:
+        raise HTTPException(status_code=404, detail="Bot not found")
+    return bot

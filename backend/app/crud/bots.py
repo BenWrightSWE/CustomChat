@@ -6,21 +6,12 @@ def create_bot(user_id: str, bot_data: BotCreate):
     bot_dict = bot_data.model_dump()
     bot_dict["user_id"] = user_id
 
-    response = (
-        supabase_admin.table("bots")
-        .insert(bot_dict)
-        .execute()
-    )
+    response = supabase_admin.table("bots").insert(bot_dict).execute()
     return response.data[0]
 
 
 def get_all_bots(user_id: str):
-    response = (
-         supabase_admin.table("bots")
-        .select("*")
-        .eq("user_id", user_id)
-        .execute()
-    )
+    response = supabase_admin.table("bots").select("*").eq("user_id", user_id).execute()
     return response.data
 
 

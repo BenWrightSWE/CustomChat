@@ -5,7 +5,9 @@ import uuid
 class BotBase(BaseModel):
     bot_name: str
     bot_desc: str
+    avatar: str
     color: str
+    storage: int
     uses: int
 
 

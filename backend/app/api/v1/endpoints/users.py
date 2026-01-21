@@ -5,9 +5,10 @@ from backend.app.core.security import get_current_user
 
 router = APIRouter()
 
+
 # route to get a user's data
-@router.get("/me", response_model=UserResponse)
-def get_current_user(current_user: dict = Depends(get_current_user)):
+@router.get("/me")
+def get_user_profile(current_user: dict = Depends(get_current_user)):
     try:
         user_id = current_user["id"]
         user = crud.get_user_by_user_id(user_id)
@@ -21,7 +22,9 @@ def get_current_user(current_user: dict = Depends(get_current_user)):
 
 # route to update a user's data
 @router.patch("/me", response_model=UserResponse)
-def update_current_user(user_update: UserUpdate, current_user: dict = Depends(get_current_user)):
+def update_current_user(
+    user_update: UserUpdate, current_user: dict = Depends(get_current_user)
+):
     user_id = current_user["id"]
 
     if not user_update.model_dump(exclude_unset=True):
