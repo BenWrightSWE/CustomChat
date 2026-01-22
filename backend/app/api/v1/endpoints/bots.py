@@ -43,7 +43,7 @@ def update_bot_by_id(
     update_data: BotUpdate,
     bot_id: int,
     current_user: dict = Depends(get_current_user),
-    _: dict = Depends(verify_bot_ownership)
+    _: dict = Depends(verify_bot_ownership),
 ):
     try:
         if not update_data.model_dump(exclude_unset=True):
@@ -61,7 +61,7 @@ def update_bot_by_id(
 def delete_bot_by_id(
     bot_id: int,
     current_user: dict = Depends(get_current_user),
-    _: dict = Depends(verify_bot_ownership)
+    _: dict = Depends(verify_bot_ownership),
 ):
     try:
         crud.delete_bot_by_id(current_user["id"], bot_id)

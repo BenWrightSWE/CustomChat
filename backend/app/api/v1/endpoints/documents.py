@@ -4,14 +4,20 @@ from backend.app.schemas.documents import DocumentCreate, DocumentResponse
 from backend.app.crud import documents as crud
 from backend.app.core.security import verify_bot_ownership
 from backend.app.utils.storage import (
-    get_document_storage_path,
     upload_file_to_storage,
     download_file_from_storage,
     delete_file_from_storage,
 )
-from backend.app.utils.documents import get_document_storage_path_by_id
+from backend.app.utils.documents import get_document_and_storage_path_by_id
 import tempfile
 import os
+
+"""
+Should add rollback logic later for create_document and delete_document_by_id. I'm not doing it now because ordering of 
+creating in storage then in db makes it sothat it won't show up to user if it fails and will overwrite if it's just in 
+the storage.
+"""
+
 
 router = APIRouter()
 
@@ -21,18 +27,19 @@ ALLOWED_CONTENT_TYPES = {
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 }
 
-MAX_FILE_SIZE = 10 * 1024 * 1024
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
 
 
-# Should add rollback logic later, not doing it now because ordering of creating in storage then in db makes it
-# so that it won't show up to user if it fails and will overwrite if it's just in the storage.
-@router.post("/bots/{bot_id}/documents", response_model=DocumentResponse, status_code=201)
+@router.post(
+    "/bots/{bot_id}/documents", response_model=DocumentResponse, status_code=201
+)
 async def create_document(
-        bot_id: int,
-        doc_data: DocumentCreate,
-        file: UploadFile,
-        _: dict = Depends(verify_bot_ownership)
+    bot_id: int,
+    doc_data: DocumentCreate,
+    file: UploadFile,
+    _: dict = Depends(verify_bot_ownership),
 ):
+
     try:
         # Validates content type
         if file.content_type not in ALLOWED_CONTENT_TYPES:
@@ -50,8 +57,13 @@ async def create_document(
         else:
             storage_path = f"documents/{bot_id}/{file.filename}"
 
-            upload_file_to_storage(storage_path, file_content, file.content_type, upsert="true")
-            return crud.create_document(bot_id, doc_data)
+            upload_file_to_storage(
+                storage_path, file_content, file.content_type, upsert="true"
+            )
+
+            return crud.create_document(
+                bot_id, doc_data
+            )  # creates document in relational db
     except HTTPException:
         raise
     except Exception as e:
@@ -60,10 +72,7 @@ async def create_document(
 
 
 @router.get("/bots/{bot_id}/documents", response_model=list[DocumentResponse])
-def get_all_documents(
-        bot_id: int,
-        _: dict = Depends(verify_bot_ownership)
-):
+def get_all_documents(bot_id: int, _: dict = Depends(verify_bot_ownership)):
     try:
         return crud.get_all_documents(bot_id)
     except Exception as e:
@@ -73,9 +82,7 @@ def get_all_documents(
 
 @router.get("/bots/{bot_id}/documents/{doc_id}", response_model=DocumentResponse)
 def get_document_by_id(
-        bot_id: int,
-        doc_id: int,
-        _: dict = Depends(verify_bot_ownership)
+    bot_id: int, doc_id: int, _: dict = Depends(verify_bot_ownership)
 ):
     try:
         feedback = crud.get_document_by_id(bot_id, doc_id)
@@ -89,18 +96,20 @@ def get_document_by_id(
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@router.delete("/bots/{bot_id}/documents/{doc_id}", response_model=DocumentResponse, status_code=204)
+@router.delete(
+    "/bots/{bot_id}/documents/{doc_id}",
+    response_model=DocumentResponse,
+    status_code=204,
+)
 async def delete_document_by_id(
-        bot_id: int,
-        doc_id: int,
-        _: dict = Depends(verify_bot_ownership)
+    bot_id: int, doc_id: int, _: dict = Depends(verify_bot_ownership)
 ):
     try:
-        storage_path = get_document_storage_path_by_id(bot_id, doc_id)[1]
+        storage_path = get_document_and_storage_path_by_id(bot_id, doc_id)[1]
 
-        crud.delete_document_by_id(bot_id, doc_id)  # deletes from db
+        crud.delete_document_by_id(bot_id, doc_id)  # deletes from relational db
 
-        delete_file_from_storage(storage_path)  # deletes from storage
+        delete_file_from_storage(storage_path)
 
         return None
     except HTTPException:
@@ -112,13 +121,13 @@ async def delete_document_by_id(
 
 @router.get("/bots/{bot_id}/documents/{doc_id}/download", response_class=FileResponse)
 def download_document_by_id(
-        bot_id: int,
-        doc_id: int,
-        background_tasks: BackgroundTasks,
-        _: dict = Depends(verify_bot_ownership)
+    bot_id: int,
+    doc_id: int,
+    background_tasks: BackgroundTasks,
+    _: dict = Depends(verify_bot_ownership),
 ):
     try:
-        db_doc, storage_path = get_document_storage_path_by_id(bot_id, doc_id)
+        db_doc, storage_path = get_document_and_storage_path_by_id(bot_id, doc_id)
 
         bytes = download_file_from_storage(storage_path)
 

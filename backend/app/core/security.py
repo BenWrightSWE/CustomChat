@@ -19,7 +19,7 @@ jwks_client = PyJWKClient(
 def get_current_user(
     auth_credentials: HTTPAuthorizationCredentials = Depends(security),
 ) -> dict:
-    """Verify Supabase JWT token and return user ID and token on success."""
+    """Verifies the Supabase JWT token and returns the user ID and token on success."""
     token = auth_credentials.credentials
     try:
         # Get the signing key from Supabase's JWKS endpoint
@@ -55,10 +55,17 @@ def get_current_user(
 
 
 def verify_bot_ownership(
-    bot_id: int = Path(...),
-    current_user: dict = Depends(get_current_user)
+    bot_id: int = Path(...), current_user: dict = Depends(get_current_user)
 ):
+    """
+    Verifies the bot belongs to the current user
+
+    Raises HTTPException if the bot does not belong to the user.
+    """
     bot = bot_crud.get_bot_by_id(current_user["id"], bot_id)
     if not bot:
-        raise HTTPException(status_code=404, detail="Bot not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Bot not found or does not belong to the current user",
+        )
     return bot

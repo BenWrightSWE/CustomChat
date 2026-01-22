@@ -1,14 +1,17 @@
 from backend.app.crud import documents as crud
 from fastapi import HTTPException
+from backend.app.schemas.documents import DocumentResponse
 
 
 # Not put in CRUD due to it not directly accessing the database.
-def get_document_and_storage_path_by_id(bot_id: int, doc_id: int) -> tuple[dict, str]:
+def get_document_and_storage_path_by_id(
+    bot_id: int, doc_id: int
+) -> tuple[DocumentResponse, str]:
     """
     Returns the document and its storage path for a document in the database by its id.
     Used in the case for you have the db data but need to access the storage version of the document.
 
-    RETURNS: tuple where the first value is the document values from the db and the second is the storage path.
+    Returns a tuple where the first value is the DocumentResponse from the db and the second is the storage path.
     """
     document = crud.get_document_by_id(bot_id, doc_id)
     if not document:

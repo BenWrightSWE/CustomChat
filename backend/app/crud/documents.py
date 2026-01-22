@@ -11,9 +11,7 @@ def create_document(bot_id: int, doc_data: DocumentCreate):
 
 
 def get_all_documents(bot_id: int):
-    response = (
-        supabase_admin.table("documents").select("*").eq("bot_id", bot_id).execute()
-    )
+    response = supabase_admin.table("documents").select("*").eq("bot_id", bot_id).execute()
     return response.data
 
 
@@ -29,9 +27,11 @@ def get_document_by_id(bot_id: int, doc_id: int):
     return response.data
 
 
-# returns a document based on the file name
-# file_name is the name and the type (eg, name.txt)
 def get_document_by_filename(bot_id: int, file_name: str):
+    """
+    returns a document based on the file name
+    file_name is the name and the type (eg, name.txt)
+    """
     file_name_split = file_name.split(".")
     doc_name = file_name_split[0]
     doc_type = "." + file_name_split[1]
