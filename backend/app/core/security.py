@@ -22,15 +22,15 @@ def get_current_user(
     """Verifies the Supabase JWT token and returns the user ID and token on success."""
     token = auth_credentials.credentials
     try:
-        # Get the signing key from Supabase's JWKS endpoint
+        # Gets the signing key from Supabase's JWKS endpoint
         signing_key = jwks_client.get_signing_key_from_jwt(token).key
 
-        # Verify the token
+        # Verifies the token
         payload = jwt.decode(
             token, signing_key, algorithms=["ES256"], audience="authenticated"
         )
 
-        # Extract and validate user ID
+        # Extracts and validates user ID
         user_id = payload.get("sub")
         if not user_id:
             raise jwt.PyJWTError("Missing user ID in token")
@@ -39,15 +39,13 @@ def get_current_user(
 
     except jwt.ExpiredSignatureError:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=401,
             detail="Token has expired",
-            headers={"WWW-Authenticate": "Bearer"},
         )
     except jwt.PyJWTError:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=401,
             detail="Invalid authentication credentials",
-            headers={"WWW-Authenticate": "Bearer"},
         )
 
 

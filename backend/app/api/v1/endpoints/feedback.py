@@ -43,7 +43,6 @@ def get_feedback_by_id(
             raise HTTPException(status_code=404, detail="Feedback not found")
 
         return feedback
-
     except HTTPException:
         raise
     except Exception as e:

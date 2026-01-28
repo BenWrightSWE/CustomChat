@@ -22,9 +22,7 @@ the storage.
 router = APIRouter()
 
 ALLOWED_CONTENT_TYPES = {
-    "application/pdf",
     "text/plain",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 }
 
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
@@ -96,29 +94,6 @@ def get_document_by_id(
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@router.delete(
-    "/bots/{bot_id}/documents/{doc_id}",
-    response_model=DocumentResponse,
-    status_code=204,
-)
-async def delete_document_by_id(
-    bot_id: int, doc_id: int, _: dict = Depends(verify_bot_ownership)
-):
-    try:
-        storage_path = get_document_and_storage_path_by_id(bot_id, doc_id)[1]
-
-        crud.delete_document_by_id(bot_id, doc_id)  # deletes from relational db
-
-        delete_file_from_storage(storage_path)
-
-        return None
-    except HTTPException:
-        raise
-    except Exception as e:
-        print(f"Error fetching document: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
-
-
 @router.get("/bots/{bot_id}/documents/{doc_id}/download", response_class=FileResponse)
 def download_document_by_id(
     bot_id: int,
@@ -145,6 +120,29 @@ def download_document_by_id(
             filename=f"{db_doc.doc_name}{db_doc.doc_type}",
         )
 
+    except Exception as e:
+        print(f"Error fetching document: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@router.delete(
+    "/bots/{bot_id}/documents/{doc_id}",
+    response_model=DocumentResponse,
+    status_code=204,
+)
+async def delete_document_by_id(
+    bot_id: int, doc_id: int, _: dict = Depends(verify_bot_ownership)
+):
+    try:
+        storage_path = get_document_and_storage_path_by_id(bot_id, doc_id)[1]
+
+        crud.delete_document_by_id(bot_id, doc_id)  # deletes from relational db
+
+        delete_file_from_storage(storage_path)
+
+        return None
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"Error fetching document: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")

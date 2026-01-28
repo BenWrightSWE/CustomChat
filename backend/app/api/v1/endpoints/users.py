@@ -7,7 +7,7 @@ router = APIRouter()
 
 
 # route to get a user's data
-@router.get("/me")
+@router.get("/me", response_model=UserResponse)
 def get_user_profile(current_user: dict = Depends(get_current_user)):
     try:
         user_id = current_user["id"]
@@ -28,7 +28,7 @@ def update_current_user(
     user_id = current_user["id"]
 
     if not user_update.model_dump(exclude_unset=True):
-        raise HTTPException(status_code=400, detail="No update data provided.")
+        raise HTTPException(status_code=400, detail="No update data provided")
     try:
         crud.update_user_by_user_id(user_id, user_update)
         user = crud.get_user_by_user_id(user_id)
