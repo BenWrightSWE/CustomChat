@@ -6,25 +6,26 @@ from backend.app.core.security import get_current_user, verify_bot_ownership
 router = APIRouter()
 
 
-@router.post("/bots", response_model=BotResponse, status_code=201)
+@router.post("/", response_model=BotResponse, status_code=201)
 def create_bot(bot_data: BotCreate, current_user: dict = Depends(get_current_user)):
+    # Need to add a checker for the bot data
     try:
         return crud.create_bot(current_user["id"], bot_data)
     except Exception as e:
         print(f"Error creating bot: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error while creating bot")
 
 
-@router.get("/bots", response_model=list[BotResponse])
+@router.get("/", response_model=list[BotResponse])
 def get_all_bots(current_user: dict = Depends(get_current_user)):
     try:
         return crud.get_all_bots(current_user["id"])
     except Exception as e:
         print(f"Error fetching bots: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error while getting all bots for user")
 
 
-@router.get("/bots/{bot_id}", response_model=BotResponse)
+@router.get("/{bot_id}", response_model=BotResponse)
 def get_bot_by_id(bot_id: int, current_user: dict = Depends(get_current_user)):
     try:
         response = crud.get_bot_by_id(current_user["id"], bot_id)
@@ -35,10 +36,10 @@ def get_bot_by_id(bot_id: int, current_user: dict = Depends(get_current_user)):
         raise
     except Exception as e:
         print(f"Error fetching bot: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error while getting bot by id")
 
 
-@router.patch("/bots/{bot_id}", response_model=BotResponse)
+@router.patch("/{bot_id}", response_model=BotResponse)
 def update_bot_by_id(
     update_data: BotUpdate,
     bot_id: int,
@@ -46,10 +47,14 @@ def update_bot_by_id(
     _: dict = Depends(verify_bot_ownership),
 ):
     try:
-        if not update_data.model_dump(exclude_unset=True):
-            raise HTTPException(status_code=400, detail="No update data provided")
+        update_dict = update_data.model_dump(exclude_unset=True)
+        if not update_dict:
+            raise HTTPException(status_code=400, detail="No fields to update")
 
-        return crud.update_bot_by_id(current_user["id"], bot_id, update_data)
+        bot = crud.update_bot_by_id(current_user["id"], bot_id, update_data)
+        if not bot:
+            raise HTTPException(status_code=404, detail="Bot not found")
+        return bot
     except HTTPException:
         raise
     except Exception as e:
@@ -57,7 +62,7 @@ def update_bot_by_id(
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@router.delete("/bots/{bot_id}", status_code=204)
+@router.delete("/{bot_id}", status_code=204)
 def delete_bot_by_id(
     bot_id: int,
     current_user: dict = Depends(get_current_user),
@@ -68,4 +73,4 @@ def delete_bot_by_id(
         return None
     except Exception as e:
         print(f"Error updating bot: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error while deleting bot by id")

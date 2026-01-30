@@ -1,3 +1,9 @@
+from dotenv import load_dotenv
+from pathlib import Path
+
+env_path = Path(__file__).resolve().parents[1] / ".env"
+load_dotenv(dotenv_path=env_path)
+
 import pytest
 from fastapi.testclient import TestClient
 from io import BytesIO
@@ -6,9 +12,11 @@ import os
 from supabase import create_client
 from datetime import time, date
 
+API_PREFIX = "/api/v1"
 
 NONEXISTENT_BOT_ID = 99999
 NONEXISTENT_DOC_ID = 99999
+NONEXISTENT_FB_ID = 99999
 TEST_TXT_SIZE = 72
 
 TEST_USER_EMAIL = "test@example.com"
@@ -47,7 +55,13 @@ def ensure_test_user_exists():
         supabase.auth.admin.create_user({
             "email": TEST_USER_EMAIL,
             "password": TEST_USER_PASSWORD,
-            "email_confirm": True
+            "email_confirm": True,
+            "user_metadata": {
+                "first_name": "John",
+                "last_name": "Doe",
+                "company":  "DoubleOSeven",
+                "phone": "1234567890"
+            }
         })
         print(f"Created test user: {TEST_USER_EMAIL}")
     except Exception as e:
@@ -66,14 +80,14 @@ def supabase_test_client():
 
 
 @pytest.fixture(scope="session")
-def auth_token(supabase_client):
+def auth_token(supabase_test_client):
     """
     Get auth token for test user.
 
     Signs in as the test user and returns the JWT token.
     """
     try:
-        response = supabase_client.auth.sign_in_with_password({
+        response = supabase_test_client.auth.sign_in_with_password({
             "email": TEST_USER_EMAIL,
             "password": TEST_USER_PASSWORD
         })
@@ -106,9 +120,9 @@ def invalid_auth_headers():
 
 
 @pytest.fixture
-def test_user_id(supabase_client, auth_token):
+def test_user_id(supabase_test_client, auth_token):
     """Get the test user's ID."""
-    user = supabase_client.auth.get_user(auth_token)
+    user = supabase_test_client.auth.get_user(auth_token)
     return user.user.id
 
 # Sample File Fixtures
@@ -203,10 +217,10 @@ def sample_feedback_data():
     Adjust fields based on your FeedbackCreate schema.
     """
     return {
-        "fb_date": date(2026, 1, 6),
-        "fb_time": time(10, 30, 15),
-        "is_neg": True,
+        "fb_date": "2026-01-06",
+        "fb_time": "10:30:15",
         "fb_desc": "Sample feedback data!",
+        "is_neg": True,
         "use_log": None
     }
 
@@ -215,7 +229,7 @@ def sample_feedback_data():
 
 
 @pytest.fixture
-def test_bot_id(client, auth_headers, sample_bot_data):
+def created_bot(client, auth_headers, sample_bot_data):
     """
     Creates a test bot and return its ID. Cleans up after test.
 
@@ -223,19 +237,16 @@ def test_bot_id(client, auth_headers, sample_bot_data):
         def test_something(client, auth_headers, test_bot_id):
             response = client.get(f"/bots/{test_bot_id}")
     """
-    # Create bot
-    response = client.post("/bots", json=sample_bot_data, headers=auth_headers)
+    response = client.post(f"{API_PREFIX}/bots", json=sample_bot_data, headers=auth_headers)
     bot = response.json()
-    bot_id = bot["bot_id"]
 
-    yield bot_id  # Provide to test
+    yield bot
 
-    # Cleanup: Delete bot after test
-    client.delete(f"/bots/{bot_id}", headers=auth_headers)
+    client.delete(f"{API_PREFIX}/bots/{bot["bot_id"]}", headers=auth_headers)
 
 
 @pytest.fixture
-def created_document(client, auth_headers, test_bot_id, sample_txt_file):
+def created_document(client, auth_headers, created_bot, sample_txt_file):
     """
     Creates a test document and return its data. Cleans up after test.
 
@@ -244,7 +255,6 @@ def created_document(client, auth_headers, test_bot_id, sample_txt_file):
             doc_id = created_document["doc_id"]
             response = client.get(f"/bots/1/documents/{doc_id}")
     """
-    # Create document
     files = {"file": ("fixture_test.txt", sample_txt_file, "text/plain")}
     data = {
         "doc_name": "fixture_test",
@@ -253,19 +263,18 @@ def created_document(client, auth_headers, test_bot_id, sample_txt_file):
     }
 
     response = client.post(
-        f"/bots/{test_bot_id}/documents",
+        f"{API_PREFIX}/bots/{created_bot["bot_id"]}/documents",
         files=files,
         data=data,
         headers=auth_headers
     )
     document = response.json()
 
-    yield document  # Provide to test
+    yield document
 
-    # Cleanup: Delete document after test
     try:
         client.delete(
-            f"/bots/{test_bot_id}/documents/{document['doc_id']}",
+            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/documents/{document['doc_id']}",
             headers=auth_headers
         )
     except Exception:

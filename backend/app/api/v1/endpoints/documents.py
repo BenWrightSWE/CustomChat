@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, UploadFile, BackgroundTasks
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, BackgroundTasks, Form, File
 from fastapi.responses import FileResponse
 from backend.app.schemas.documents import DocumentCreate, DocumentResponse
 from backend.app.crud import documents as crud
@@ -29,14 +29,18 @@ MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
 
 
 @router.post(
-    "/bots/{bot_id}/documents", response_model=DocumentResponse, status_code=201
+    "/", response_model=DocumentResponse, status_code=201
 )
 async def create_document(
     bot_id: int,
-    doc_data: DocumentCreate,
-    file: UploadFile,
+    doc_name: str = Form(...),
+    doc_type: str = Form(...),
+    doc_size: int = Form(...),
+    file: UploadFile = File(...),
     _: dict = Depends(verify_bot_ownership),
 ):
+
+    doc_data = DocumentCreate(doc_name=doc_name, doc_type=doc_type, doc_size=doc_size)
 
     try:
         # Validates content type
@@ -52,6 +56,7 @@ async def create_document(
 
         if existing:
             raise HTTPException(status_code=409, detail="Document already exists")
+
         else:
             storage_path = f"documents/{bot_id}/{file.filename}"
 
@@ -66,19 +71,19 @@ async def create_document(
         raise
     except Exception as e:
         print(f"Error creating document: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error while creating document")
 
 
-@router.get("/bots/{bot_id}/documents", response_model=list[DocumentResponse])
+@router.get("/", response_model=list[DocumentResponse])
 def get_all_documents(bot_id: int, _: dict = Depends(verify_bot_ownership)):
     try:
         return crud.get_all_documents(bot_id)
     except Exception as e:
         print(f"Error fetching document: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error while getting all documents for bot")
 
 
-@router.get("/bots/{bot_id}/documents/{doc_id}", response_model=DocumentResponse)
+@router.get("/{doc_id}", response_model=DocumentResponse)
 def get_document_by_id(
     bot_id: int, doc_id: int, _: dict = Depends(verify_bot_ownership)
 ):
@@ -91,10 +96,10 @@ def get_document_by_id(
         raise
     except Exception as e:
         print(f"Error fetching document: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error while getting document by id")
 
 
-@router.get("/bots/{bot_id}/documents/{doc_id}/download", response_class=FileResponse)
+@router.get("/{doc_id}/download", response_class=FileResponse)
 def download_document_by_id(
     bot_id: int,
     doc_id: int,
@@ -104,11 +109,14 @@ def download_document_by_id(
     try:
         db_doc, storage_path = get_document_and_storage_path_by_id(bot_id, doc_id)
 
-        bytes = download_file_from_storage(storage_path)
+        if not db_doc:
+            raise HTTPException(status_code=404, detail="Document not found")
 
-        temp = tempfile.NamedTemporaryFile(delete=False, suffix=db_doc.doc_type)
+        doc_bytes = download_file_from_storage(storage_path)
 
-        temp.write(bytes)
+        temp = tempfile.NamedTemporaryFile(delete=False, suffix=db_doc["doc_type"])
+
+        temp.write(doc_bytes)
         temp.close()
 
         # Return file while cleaning up the temp file
@@ -116,25 +124,29 @@ def download_document_by_id(
 
         return FileResponse(
             temp.name,
-            media_type=db_doc.doc_type,
-            filename=f"{db_doc.doc_name}{db_doc.doc_type}",
+            media_type=db_doc["doc_type"],
+            filename=f"{db_doc["doc_name"]}{db_doc["doc_type"]}",
         )
 
+    except HTTPException:
+        raise
     except Exception as e:
         print(f"Error fetching document: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error while downloading document by id")
 
 
 @router.delete(
-    "/bots/{bot_id}/documents/{doc_id}",
-    response_model=DocumentResponse,
+    "/{doc_id}",
     status_code=204,
 )
 async def delete_document_by_id(
     bot_id: int, doc_id: int, _: dict = Depends(verify_bot_ownership)
 ):
     try:
-        storage_path = get_document_and_storage_path_by_id(bot_id, doc_id)[1]
+        db_doc, storage_path = get_document_and_storage_path_by_id(bot_id, doc_id)
+
+        if not db_doc:
+            raise HTTPException(status_code=404, detail="Document not found")
 
         crud.delete_document_by_id(bot_id, doc_id)  # deletes from relational db
 
@@ -145,4 +157,4 @@ async def delete_document_by_id(
         raise
     except Exception as e:
         print(f"Error fetching document: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500, detail="Internal server error while deleting document by id")

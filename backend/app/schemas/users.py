@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator, EmailStr
 import uuid
 
 
@@ -9,16 +9,21 @@ class UserBase(BaseModel):
     email: str
     phone: str | None
 
-
-class UserCreate(UserBase):
-    pass
+    @field_validator('phone')
+    @classmethod
+    def validate_phone(cls, value):
+        if value is not None:
+            if not value.isdigit():
+                raise ValueError('Phone must contain only digits')
+            if len(value) != 10:
+                raise ValueError('Phone must be exactly 10 digits')
+        return value
 
 
 class UserUpdate(BaseModel):
     first_name: str | None = None
     last_name: str | None = None
     company: str | None = None
-    email: str | None = None
     phone: str | None = None
 
 
@@ -27,3 +32,7 @@ class UserResponse(UserBase):
 
     class Config:
         from_attributes = True  # Allows Pydantic to read data from database models
+
+
+class EmailUpdate(BaseModel):
+    email: EmailStr

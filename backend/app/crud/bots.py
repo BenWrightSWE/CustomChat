@@ -21,14 +21,12 @@ def get_bot_by_id(user_id: str, bot_id: int):
         .select("*")
         .eq("user_id", user_id)
         .eq("bot_id", bot_id)
-        .single()
         .execute()
     )
-    return response.data
+    return response.data[0] if response.data else None
 
 
 def update_bot_by_id(user_id: str, bot_id: int, update_data: BotUpdate):
-
     update_dict = update_data.model_dump(exclude_unset=True)
 
     response = (
@@ -38,7 +36,7 @@ def update_bot_by_id(user_id: str, bot_id: int, update_data: BotUpdate):
         .eq("bot_id", bot_id)
         .execute()
     )
-    return response.data
+    return response.data[0] if response.data else None
 
 
 def delete_bot_by_id(user_id: str, bot_id: int):

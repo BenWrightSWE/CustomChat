@@ -2,12 +2,13 @@ from backend.tests.conftest import (
     NONEXISTENT_BOT_ID,
     NONEXISTENT_DOC_ID,
     TEST_TXT_SIZE,
+    API_PREFIX
 )
 
 
 class TestCreateDocument:
 
-    def test_create_txt_doc_returns_201(self, client, auth_headers, test_bot_id, sample_txt_file):
+    def test_create_txt_doc_returns_201(self, client, auth_headers, created_bot, sample_txt_file):
         files = {"file": ("test.txt", sample_txt_file, "text/plain")}
         data = {
             "doc_name": "test",
@@ -16,7 +17,7 @@ class TestCreateDocument:
         }
 
         response = client.post(
-            f"/bots/{test_bot_id}/documents",
+            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/documents",
             files=files,
             data=data,
             headers=auth_headers
@@ -29,13 +30,13 @@ class TestCreateDocument:
         assert "doc_id" in json_data
 
         client.delete(
-            f"/bots/{test_bot_id}/documents/{json_data['doc_id']}",
+            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/documents/{json_data['doc_id']}",
             headers=auth_headers
         )
 
     # add test for pdf and docx
 
-    def test_create_doc_type_not_allowed_returns_400(self, client, auth_headers, test_bot_id, invalid_file_exe):
+    def test_create_doc_type_not_allowed_returns_400(self, client, auth_headers, created_bot, invalid_file_exe):
         files = {"file": ("malware.exe", invalid_file_exe, "application/x-msdownload")}
         data = {
             "doc_name": "malware",
@@ -44,7 +45,7 @@ class TestCreateDocument:
         }
 
         response = client.post(
-            f"/bots/{test_bot_id}/documents",
+            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/documents",
             files=files,
             data=data,
             headers=auth_headers
@@ -53,7 +54,7 @@ class TestCreateDocument:
         assert response.status_code == 400
         assert "File type not allowed" in response.json()["detail"]
 
-    def test_create_doc_size_exceeds_returns_400(self, client, auth_headers, test_bot_id, large_file):
+    def test_create_doc_size_exceeds_returns_400(self, client, auth_headers, created_bot, large_file):
         file_size = 11 * 1024 * 1024  # 11MB
         files = {"file": ("huge.txt", large_file, "text/plain")}
         data = {
@@ -63,7 +64,7 @@ class TestCreateDocument:
         }
 
         response = client.post(
-            f"/bots/{test_bot_id}/documents",
+            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/documents",
             files=files,
             data=data,
             headers=auth_headers
@@ -72,7 +73,7 @@ class TestCreateDocument:
         assert response.status_code == 400
         assert "File too large" in response.json()["detail"]
 
-    def test_create_doc_duplicate_returns_409(self, client, auth_headers, test_bot_id, sample_txt_file):
+    def test_create_doc_duplicate_returns_409(self, client, auth_headers, created_bot, sample_txt_file):
         files = {"file": ("duplicate.txt", sample_txt_file, "text/plain")}
         data = {
             "doc_name": "duplicate",
@@ -81,7 +82,7 @@ class TestCreateDocument:
         }
 
         first_response = client.post(
-            f"/bots/{test_bot_id}/documents",
+            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/documents",
             files=files,
             data=data,
             headers=auth_headers
@@ -91,7 +92,7 @@ class TestCreateDocument:
 
         sample_txt_file.seek(0)  # Reset file pointer
         second_response = client.post(
-            f"/bots/{test_bot_id}/documents",
+            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/documents",
             files=files,
             data=data,
             headers=auth_headers
@@ -100,9 +101,9 @@ class TestCreateDocument:
         assert second_response.status_code == 409
         assert "Document already exists" in second_response.json()["detail"]
 
-        client.delete(f"/bots/{test_bot_id}/documents/{doc_id}", headers=auth_headers)
+        client.delete(f"{API_PREFIX}/bots/{created_bot["bot_id"]}/documents/{doc_id}", headers=auth_headers)
 
-    def test_create_doc_without_auth_returns_401(self, client, invalid_auth_headers, test_bot_id, sample_txt_file):
+    def test_create_doc_without_auth_returns_401(self, client, invalid_auth_headers, created_bot, sample_txt_file):
         files = {"file": ("test.txt", sample_txt_file, "text/plain")}
         data = {
             "doc_name": "test",
@@ -111,7 +112,7 @@ class TestCreateDocument:
         }
 
         response = client.post(
-            f"/bots/{test_bot_id}/documents",
+            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/documents",
             files=files,
             data=data,
             headers=invalid_auth_headers
@@ -128,7 +129,7 @@ class TestCreateDocument:
         }
 
         response = client.post(
-            f"/bots/{NONEXISTENT_BOT_ID}/documents",
+            f"{API_PREFIX}/bots/{NONEXISTENT_BOT_ID}/documents",
             files=files,
             data=data,
             headers=auth_headers
@@ -140,18 +141,18 @@ class TestCreateDocument:
 
 class TestGetAllDocuments:
 
-    def test_get_documents_returns_200_and_document_list(self, client, auth_headers, test_bot_id):
+    def test_get_documents_returns_200_and_document_list(self, client, auth_headers, created_bot):
         response = client.get(
-            f"/bots/{test_bot_id}/documents",
+            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/documents",
             headers=auth_headers
         )
 
         assert response.status_code == 200
         assert isinstance(response.json(), list)
 
-    def test_get_documents_without_auth_returns_401(self, client, invalid_auth_headers, test_bot_id):
+    def test_get_documents_without_auth_returns_401(self, client, invalid_auth_headers, created_bot):
         response = client.get(
-            f"/bots/{test_bot_id}/documents",
+            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/documents",
             headers=invalid_auth_headers
         )
 
@@ -159,7 +160,7 @@ class TestGetAllDocuments:
 
     def test_get_documents_for_nonexistent_bot_returns_404(self, client, auth_headers):
         response = client.get(
-            f"/bots/{NONEXISTENT_BOT_ID}/documents",
+            f"{API_PREFIX}/bots/{NONEXISTENT_BOT_ID}/documents",
             headers=auth_headers
         )
 
@@ -174,7 +175,7 @@ class TestGetDocumentById:
         doc_id = created_document["doc_id"]
 
         response = client.get(
-            f"/bots/{bot_id}/documents/{doc_id}",
+            f"{API_PREFIX}/bots/{bot_id}/documents/{doc_id}",
             headers=auth_headers
         )
 
@@ -192,7 +193,7 @@ class TestGetDocumentById:
         doc_id = created_document["doc_id"]
 
         response = client.get(
-            f"/bots/{bot_id}/documents/{doc_id}",
+            f"{API_PREFIX}/bots/{bot_id}/documents/{doc_id}",
             headers=invalid_auth_headers
         )
 
@@ -202,16 +203,16 @@ class TestGetDocumentById:
         doc_id = 1
 
         response = client.get(
-            f"/bots/{NONEXISTENT_BOT_ID}/documents/{doc_id}",
+            f"{API_PREFIX}/bots/{NONEXISTENT_BOT_ID}/documents/{doc_id}",
             headers=auth_headers
         )
 
         assert response.status_code == 404
         assert "Bot not found" in response.json()["detail"]
 
-    def test_get_document_by_id_for_nonexistent_doc_returns_404(self, client, auth_headers, test_bot_id):
+    def test_get_document_by_id_for_nonexistent_doc_returns_404(self, client, auth_headers, created_bot):
         response = client.get(
-            f"/bots/{test_bot_id}/documents/{NONEXISTENT_BOT_ID}",
+            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/documents/{NONEXISTENT_DOC_ID}",
             headers=auth_headers
         )
 
@@ -225,7 +226,7 @@ class TestDownloadDocumentById:
         doc_id = created_document["doc_id"]
 
         response = client.get(
-            f"/bots/{bot_id}/documents/{doc_id}/download",
+            f"{API_PREFIX}/bots/{bot_id}/documents/{doc_id}/download",
             headers=auth_headers
         )
 
@@ -239,7 +240,7 @@ class TestDownloadDocumentById:
         doc_id = created_document["doc_id"]
 
         response = client.get(
-            f"/bots/{bot_id}/documents/{doc_id}/download",
+            f"{API_PREFIX}/bots/{bot_id}/documents/{doc_id}/download",
             headers=invalid_auth_headers
         )
 
@@ -249,16 +250,16 @@ class TestDownloadDocumentById:
         doc_id = 1
 
         response = client.get(
-            f"/bots/{NONEXISTENT_BOT_ID}/documents/{doc_id}/download",
+            f"{API_PREFIX}/bots/{NONEXISTENT_BOT_ID}/documents/{doc_id}/download",
             headers=auth_headers
         )
 
         assert response.status_code == 404
         assert "Bot not found" in response.json()["detail"]
 
-    def test_download_documents_by_id_for_nonexistent_doc_returns_404(self, client, auth_headers, test_bot_id):
+    def test_download_documents_by_id_for_nonexistent_doc_returns_404(self, client, auth_headers, created_bot):
         response = client.get(
-            f"/bots/{test_bot_id}/documents/{NONEXISTENT_DOC_ID}/download",
+            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/documents/{NONEXISTENT_DOC_ID}/download",
             headers=auth_headers
         )
 
@@ -267,7 +268,7 @@ class TestDownloadDocumentById:
 
 
 class TestDeleteDocumentById:
-    def test_delete_document_by_id_returns_204(self, client, auth_headers, test_bot_id, sample_txt_file):
+    def test_delete_document_by_id_returns_204(self, client, auth_headers, created_bot, sample_txt_file):
         files = {"file": ("delete_me.txt", sample_txt_file, "text/plain")}
         data = {
             "doc_name": "delete_me",
@@ -275,7 +276,7 @@ class TestDeleteDocumentById:
             "doc_size": TEST_TXT_SIZE
         }
         create_response = client.post(
-            f"/bots/{test_bot_id}/documents",
+            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/documents",
             files=files,
             data=data,
             headers=auth_headers
@@ -283,7 +284,7 @@ class TestDeleteDocumentById:
         doc_id = create_response.json()["doc_id"]
 
         response = client.delete(
-            f"/bots/{test_bot_id}/documents/{doc_id}",
+            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/documents/{doc_id}",
             headers=auth_headers
         )
 
@@ -294,16 +295,16 @@ class TestDeleteDocumentById:
         doc_id = 1
 
         response = client.delete(
-            f"/bots/{NONEXISTENT_BOT_ID}/documents/{doc_id}",
+            f"{API_PREFIX}/bots/{NONEXISTENT_BOT_ID}/documents/{doc_id}",
             headers=auth_headers
         )
 
         assert response.status_code == 404
         assert "Bot not found" in response.json()["detail"]
 
-    def test_delete_document_by_id_for_nonexistent_doc_returns_404(self, client, auth_headers, test_bot_id):
+    def test_delete_document_by_id_for_nonexistent_doc_returns_404(self, client, auth_headers, created_bot):
         response = client.delete(
-            f"/bots/{test_bot_id}/documents/{NONEXISTENT_DOC_ID}",
+            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/documents/{NONEXISTENT_DOC_ID}",
             headers=auth_headers
         )
 
@@ -315,7 +316,7 @@ class TestDeleteDocumentById:
         doc_id = created_document["doc_id"]
 
         response = client.delete(
-            f"/bots/{bot_id}/documents/{doc_id}",
+            f"{API_PREFIX}/bots/{bot_id}/documents/{doc_id}",
             headers=invalid_auth_headers
         )
 

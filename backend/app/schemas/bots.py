@@ -15,12 +15,17 @@ class BotCreate(BotBase):
     pass
 
 
-class BotUpdate(BotBase):
-    pass
+class BotUpdate(BaseModel):
+    bot_name: str | None = None
+    bot_desc: str | None = None
+    avatar: str | None = None
+    color: str | None = None
+    storage: int | None = None
+    uses: int | None = None
 
 
 class BotResponse(BotBase):
-    bot_id: uuid.UUID
+    bot_id: int
 
     class Config:
         from_attributes = True  # Allows Pydantic to read data from database models
