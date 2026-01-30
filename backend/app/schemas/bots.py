@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-import uuid
 
 
 class BotBase(BaseModel):

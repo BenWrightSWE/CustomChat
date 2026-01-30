@@ -1,4 +1,5 @@
-from backend.tests.conftest import API_PREFIX
+from tests.conftest import API_PREFIX
+
 
 class TestGetUserProfile:
 

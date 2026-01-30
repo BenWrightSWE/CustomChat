@@ -1,4 +1,4 @@
-from backend.app.core.supabase import supabase_admin
+from app.core.supabase import supabase_admin
 
 
 # gets storage path for document based storage functions

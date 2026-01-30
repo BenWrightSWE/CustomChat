@@ -6,11 +6,10 @@ load_dotenv(dotenv_path=env_path)
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backend.app.core import supabase
-from backend.app.api.v1.router import api_router
+from app.core import supabase
+from app.api.v1.router import api_router
 
 app = FastAPI(title="CustomChat API", version="1.0.0")
-
 
 app.add_middleware(
     CORSMiddleware,

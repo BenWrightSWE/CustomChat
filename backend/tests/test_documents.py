@@ -1,4 +1,4 @@
-from backend.tests.conftest import (
+from tests.conftest import (
     NONEXISTENT_BOT_ID,
     NONEXISTENT_DOC_ID,
     TEST_TXT_SIZE,

@@ -1,4 +1,4 @@
-from backend.tests.conftest import NONEXISTENT_BOT_ID, API_PREFIX
+from tests.conftest import NONEXISTENT_BOT_ID, API_PREFIX
 
 
 class TestCreateBot:

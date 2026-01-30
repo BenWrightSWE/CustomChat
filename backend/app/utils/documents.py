@@ -1,6 +1,6 @@
-from backend.app.crud import documents as crud
+from app.crud import documents as crud
 from fastapi import HTTPException
-from backend.app.schemas.documents import DocumentResponse
+from app.schemas.documents import DocumentResponse
 
 
 # Not put in CRUD due to it not directly accessing the database.

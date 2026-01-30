@@ -1,5 +1,5 @@
-from backend.app.schemas.users import UserUpdate
-from backend.app.core.supabase import supabase_admin
+from app.schemas.users import UserUpdate
+from app.core.supabase import supabase_admin
 
 
 def get_user_by_user_id(user_id: str):

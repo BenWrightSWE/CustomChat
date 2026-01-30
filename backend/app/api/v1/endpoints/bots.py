@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
-from backend.app.schemas.bots import BotCreate, BotUpdate, BotResponse
-from backend.app.crud import bots as crud
-from backend.app.core.security import get_current_user, verify_bot_ownership
+from app.schemas.bots import BotCreate, BotUpdate, BotResponse
+from app.crud import bots as crud
+from app.core.security import get_current_user, verify_bot_ownership
 
 router = APIRouter()
 

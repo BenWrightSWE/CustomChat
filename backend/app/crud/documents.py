@@ -1,5 +1,5 @@
-from backend.app.schemas.documents import DocumentCreate
-from backend.app.core.supabase import supabase_admin
+from app.schemas.documents import DocumentCreate
+from app.core.supabase import supabase_admin
 from fastapi import HTTPException
 
 

@@ -1,9 +1,9 @@
-from backend.tests.conftest import (
+from tests.conftest import (
     NONEXISTENT_BOT_ID,
     NONEXISTENT_FB_ID,
     API_PREFIX
 )
-from backend.app.core.supabase import supabase_admin
+from app.core.supabase import supabase_admin
 
 
 class TestCreateFeedback:

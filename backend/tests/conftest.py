@@ -7,10 +7,9 @@ load_dotenv(dotenv_path=env_path)
 import pytest
 from fastapi.testclient import TestClient
 from io import BytesIO
-from backend.app.main import app
+from app.main import app
 import os
 from supabase import create_client
-from datetime import time, date
 
 API_PREFIX = "/api/v1"
 

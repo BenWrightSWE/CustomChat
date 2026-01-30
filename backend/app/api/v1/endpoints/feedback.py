@@ -1,8 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
-from backend.app.schemas.feedback import FeedbackCreate, FeedbackResponse
-from backend.app.crud import feedback as crud
-from backend.app.crud import bots as bot_crud
-from backend.app.core.security import get_current_user, verify_bot_ownership
+from app.schemas.feedback import FeedbackCreate, FeedbackResponse
+from app.crud import feedback as crud
+from app.core.security import verify_bot_ownership
 
 router = APIRouter()
 

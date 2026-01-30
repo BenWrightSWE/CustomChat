@@ -1,5 +1,5 @@
-from backend.app.schemas.feedback import FeedbackCreate
-from backend.app.core.supabase import supabase_admin
+from app.schemas.feedback import FeedbackCreate
+from app.core.supabase import supabase_admin
 
 
 def create_feedback(bot_id: int, fb_data: FeedbackCreate):

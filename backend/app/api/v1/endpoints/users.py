@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends
-from backend.app.schemas.users import UserUpdate, UserResponse, EmailUpdate
-from backend.app.crud import users as crud
-from backend.app.core.security import get_current_user
-from backend.app.core.supabase import supabase_admin
+from app.schemas.users import UserUpdate, UserResponse, EmailUpdate
+from app.crud import users as crud
+from app.core.security import get_current_user
+from app.core.supabase import supabase_admin
 
 router = APIRouter()
 

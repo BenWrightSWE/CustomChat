@@ -1,14 +1,14 @@
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, BackgroundTasks, Form, File
 from fastapi.responses import FileResponse
-from backend.app.schemas.documents import DocumentCreate, DocumentResponse
-from backend.app.crud import documents as crud
-from backend.app.core.security import verify_bot_ownership
-from backend.app.utils.storage import (
+from app.schemas.documents import DocumentCreate, DocumentResponse
+from app.crud import documents as crud
+from app.core.security import verify_bot_ownership
+from app.utils.storage import (
     upload_file_to_storage,
     download_file_from_storage,
     delete_file_from_storage,
 )
-from backend.app.utils.documents import get_document_and_storage_path_by_id
+from app.utils.documents import get_document_and_storage_path_by_id
 import tempfile
 import os
 

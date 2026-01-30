@@ -4,7 +4,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
 from jwt import PyJWKClient
 from dotenv import load_dotenv
-from backend.app.crud import bots as bot_crud
+from app.crud import bots as bot_crud
 
 load_dotenv()
 
