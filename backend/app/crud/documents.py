@@ -27,7 +27,7 @@ def get_document_by_id(bot_id: int, doc_id: int):
     )
 
     if response is None or response.data is None:
-        raise HTTPException(status_code=404, detail="Document not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
 
     return response.data
 

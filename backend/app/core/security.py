@@ -39,12 +39,12 @@ def get_current_user(
 
     except jwt.ExpiredSignatureError:
         raise HTTPException(
-            status_code=401,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token has expired",
         )
     except jwt.PyJWTError:
         raise HTTPException(
-            status_code=401,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials",
         )
 
@@ -63,7 +63,7 @@ def verify_bot_ownership(
     bot = bot_crud.get_bot_by_id(current_user["id"], bot_id)
     if not bot:
         raise HTTPException(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="Bot not found or does not belong to the current user",
         )
     return bot

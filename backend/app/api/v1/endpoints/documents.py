@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends, UploadFile, BackgroundTasks, Form, File
+from fastapi import APIRouter, HTTPException, Depends, UploadFile, BackgroundTasks, Form, File, status
 from fastapi.responses import FileResponse
 from app.schemas.documents import DocumentCreate, DocumentResponse
 from app.crud import documents as crud
@@ -29,7 +29,7 @@ MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
 
 
 @router.post(
-    "/", response_model=DocumentResponse, status_code=201
+    "/", response_model=DocumentResponse, status_code=status.HTTP_201_CREATED
 )
 async def create_document(
     bot_id: int,
@@ -71,7 +71,7 @@ async def create_document(
         raise
     except Exception as e:
         print(f"Error creating document: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error while creating document")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error while creating document")
 
 
 @router.get("/", response_model=list[DocumentResponse])
@@ -80,7 +80,7 @@ def get_all_documents(bot_id: int, _: dict = Depends(verify_bot_ownership)):
         return crud.get_all_documents(bot_id)
     except Exception as e:
         print(f"Error fetching document: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error while getting all documents for bot")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error while getting all documents for bot")
 
 
 @router.get("/{doc_id}", response_model=DocumentResponse)
@@ -90,13 +90,13 @@ def get_document_by_id(
     try:
         feedback = crud.get_document_by_id(bot_id, doc_id)
         if not feedback:
-            raise HTTPException(status_code=404, detail="Document not found")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
         return feedback
     except HTTPException:
         raise
     except Exception as e:
         print(f"Error fetching document: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error while getting document by id")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error while getting document by id")
 
 
 @router.get("/{doc_id}/download", response_class=FileResponse)
@@ -110,7 +110,7 @@ def download_document_by_id(
         db_doc, storage_path = get_document_and_storage_path_by_id(bot_id, doc_id)
 
         if not db_doc:
-            raise HTTPException(status_code=404, detail="Document not found")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
 
         doc_bytes = download_file_from_storage(storage_path)
 
@@ -132,12 +132,12 @@ def download_document_by_id(
         raise
     except Exception as e:
         print(f"Error fetching document: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error while downloading document by id")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error while downloading document by id")
 
 
 @router.delete(
     "/{doc_id}",
-    status_code=204,
+    status_code=status.HTTP_204_NO_CONTENT,
 )
 async def delete_document_by_id(
     bot_id: int, doc_id: int, _: dict = Depends(verify_bot_ownership)
@@ -146,7 +146,7 @@ async def delete_document_by_id(
         db_doc, storage_path = get_document_and_storage_path_by_id(bot_id, doc_id)
 
         if not db_doc:
-            raise HTTPException(status_code=404, detail="Document not found")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
 
         crud.delete_document_by_id(bot_id, doc_id)  # deletes from relational db
 
@@ -157,4 +157,4 @@ async def delete_document_by_id(
         raise
     except Exception as e:
         print(f"Error fetching document: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error while deleting document by id")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error while deleting document by id")
