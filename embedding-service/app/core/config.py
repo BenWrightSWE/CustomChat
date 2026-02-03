@@ -1,13 +1,18 @@
 from pydantic_settings import BaseSettings
-from dotenv import load_dotenv
 import os
 
 class Settings(BaseSettings):
-    API_KEY: str = os.getenv("EMBEDDING_API_KEY")
-    API_KEY_NAME: str = "EMBEDDING_API_Key"
+    EMBEDDING_API_KEY: str
+
+    API_KEY_NAME: str = "X-API-KEY"
+    MAX_DOCUMENT_SIZE_MB: int = 10
+
+    @property
+    def MAX_DOCUMENT_SIZE(self) -> int:
+        return self.MAX_DOCUMENT_SIZE_MB * 1024 * 1024
 
     class Config:
-        env_file = ".env"
+        env_file = ".env.test"
 
 
 settings = Settings()

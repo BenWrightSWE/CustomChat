@@ -8,7 +8,7 @@ CHUNK_SIZE = 512
 
 class ChunkClient:
     def __init__(self):
-        self.neox_chunker = semchunk.chunkerify("gpt-neox-20b", CHUNK_SIZE) or \
+        self.neox_chunker = semchunk.chunkerify("EleutherAI/gpt-neox-20b", CHUNK_SIZE) or \
             semchunk.chunkerify(AutoTokenizer.from_pretrained("EleutherAI/gpt-neox-20b"), CHUNK_SIZE) or \
             semchunk.chunkerify(lambda text: len(text.split()), CHUNK_SIZE)
 

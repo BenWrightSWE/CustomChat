@@ -1,6 +1,6 @@
 from app.schemas.documents import DocumentCreate
 from app.core.supabase import supabase_admin
-from fastapi import HTTPException
+from fastapi import HTTPException, status
 
 
 def create_document(bot_id: int, doc_data: DocumentCreate):

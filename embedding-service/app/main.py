@@ -10,10 +10,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.router import api_router
 from app.core.chunk_client import ChunkClient
 from app.core.embed_client import EmbedClient
+from app.api.deps import get_api_key
 
 chunk_client = None
 embed_client = None
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -26,10 +26,9 @@ async def lifespan(app: FastAPI):
 
     yield
 
-    print("Shutting down Embedding API")
+    print("Shutting down Embed API")
 
-
-app = FastAPI(title="Embedding API", version="1.0.0", lifespan=lifespan)
+app = FastAPI(title="Embed API", version="1.0.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -42,6 +41,11 @@ app.add_middleware(
 app.include_router(
     api_router,
     prefix="/api/v1",
-    tags=["embeddings"],
+    tags=["Embed"],
     dependencies=[Depends(get_api_key)]
 )
+
+
+@app.get("/")
+async def ping():
+    return {"message": "pong"}
