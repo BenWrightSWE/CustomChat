@@ -1,4 +1,5 @@
 from tests.conftest import NONEXISTENT_BOT_ID, API_PREFIX
+from fastapi import status
 
 
 class TestCreateBot:
@@ -9,7 +10,7 @@ class TestCreateBot:
             headers=auth_headers
         )
 
-        assert response.status_code == 201
+        assert response.status_code == status.HTTP_201_CREATED
         json_data = response.json()
         assert json_data["bot_name"] == "Test Bot"
         assert json_data["bot_desc"] == "A bot for testing"
@@ -26,7 +27,7 @@ class TestCreateBot:
             headers=invalid_auth_headers
         )
 
-        assert response.status_code == 401
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     # add test to validation part where it checks if bot data is complete.
 
@@ -40,7 +41,7 @@ class TestGetAllBots:
             headers=auth_headers
         )
 
-        assert response.status_code == 200
+        assert response.status_code == status.HTTP_200_OK
         assert isinstance(response.json(), list)
 
     def test_get_all_bots_without_auth_returns_401(self, client, invalid_auth_headers, sample_bot_data):
@@ -49,7 +50,7 @@ class TestGetAllBots:
             headers=invalid_auth_headers
         )
 
-        assert response.status_code == 401
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 class TestGetBotById:
@@ -59,7 +60,7 @@ class TestGetBotById:
             headers=auth_headers
         )
 
-        assert response.status_code == 200
+        assert response.status_code == status.HTTP_200_OK
         json_data = response.json()
         assert json_data["bot_name"] == "Test Bot"
         assert json_data["bot_desc"] == "A bot for testing"
@@ -75,7 +76,7 @@ class TestGetBotById:
             headers=auth_headers
         )
 
-        assert response.status_code == 404
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_get_bot_by_id_without_auth_returns_401(self, client, invalid_auth_headers, created_bot):
         response = client.get(
@@ -83,7 +84,7 @@ class TestGetBotById:
             headers=invalid_auth_headers
         )
 
-        assert response.status_code == 401
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 class TestUpdateBotByID:
@@ -99,7 +100,7 @@ class TestUpdateBotByID:
         json_data = response.json()
         print(json_data)
 
-        assert response.status_code == 200
+        assert response.status_code == status.HTTP_200_OK
         assert json_data["bot_name"] == "Updated Bot"
         assert json_data["bot_desc"] == "A bot for testing"
         assert json_data["avatar"] == "base"
@@ -126,7 +127,7 @@ class TestUpdateBotByID:
         json_data = response.json()
         print(json_data)
 
-        assert response.status_code == 200
+        assert response.status_code == status.HTTP_200_OK
         assert json_data["bot_name"] == "Updated Bot"
         assert json_data["bot_desc"] == "An updated bot"
         assert json_data["avatar"] == "default"
@@ -143,7 +144,7 @@ class TestUpdateBotByID:
             headers=auth_headers
         )
 
-        assert response.status_code == 400
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
     def test_update_bot_by_id_for_nonexistent_bot_returns_404(self, client, auth_headers):
         update_data = {"bot_name": "Updated Bot"}
@@ -154,7 +155,7 @@ class TestUpdateBotByID:
             headers=auth_headers
         )
 
-        assert response.status_code == 404
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_update_bot_by_id_without_auth_returns_401(self, client, invalid_auth_headers, created_bot):
         update_data = {"bot_name": "Updated Bot"}
@@ -165,7 +166,7 @@ class TestUpdateBotByID:
             headers=invalid_auth_headers
         )
 
-        assert response.status_code == 401
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 class TestDeleteBotByID:
@@ -178,7 +179,7 @@ class TestDeleteBotByID:
             headers=auth_headers
         )
 
-        assert response.status_code == 204
+        assert response.status_code == status.HTTP_204_NO_CONTENT
 
     def test_delete_bot_by_id_for_nonexistent_bot_returns_404(self, client, auth_headers):
         response = client.delete(
@@ -186,7 +187,7 @@ class TestDeleteBotByID:
             headers=auth_headers
         )
 
-        assert response.status_code == 404
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_delete_bot_by_id_without_auth_returns_401(
             self, client, auth_headers, invalid_auth_headers, sample_bot_data
@@ -199,4 +200,4 @@ class TestDeleteBotByID:
             headers=invalid_auth_headers
         )
 
-        assert response.status_code == 401
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED

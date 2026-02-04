@@ -4,6 +4,7 @@ from tests.conftest import (
     API_PREFIX
 )
 from app.core.supabase import supabase_admin
+from fastapi import status
 
 
 class TestCreateFeedback:
@@ -14,7 +15,7 @@ class TestCreateFeedback:
             headers=auth_headers
         )
 
-        assert response.status_code == 201
+        assert response.status_code == status.HTTP_201_CREATED
 
     def test_create_feedback_for_nonexistent_bot_returns_404(self, client, auth_headers, sample_feedback_data):
         response = client.post(
@@ -23,7 +24,7 @@ class TestCreateFeedback:
             headers=auth_headers
         )
 
-        assert response.status_code == 404
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_create_feedback_without_auth_returns_401(
             self, client, invalid_auth_headers, created_bot, sample_feedback_data
@@ -34,7 +35,7 @@ class TestCreateFeedback:
             headers=invalid_auth_headers
         )
 
-        assert response.status_code == 401
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 class TestGetAllFeedback:
@@ -44,7 +45,7 @@ class TestGetAllFeedback:
             headers=auth_headers
         )
 
-        assert response.status_code == 200
+        assert response.status_code == status.HTTP_200_OK
         assert isinstance(response.json(), list)
 
     def test_get_all_feedback_for_nonexistent_bot_returns_404(self, client, auth_headers):
@@ -53,7 +54,7 @@ class TestGetAllFeedback:
             headers=auth_headers
         )
 
-        assert response.status_code == 404
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_get_all_feedback_without_auth_returns_401(self, client, invalid_auth_headers, created_bot):
         response = client.get(
@@ -61,7 +62,7 @@ class TestGetAllFeedback:
             headers=invalid_auth_headers
         )
 
-        assert response.status_code == 401
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 class TestGetFeedbackById:
@@ -78,7 +79,7 @@ class TestGetFeedbackById:
             headers=auth_headers
         )
 
-        assert response.status_code == 200
+        assert response.status_code == status.HTTP_200_OK
         json_data = response.json()
         assert json_data["is_neg"] == True
         assert json_data["fb_desc"] == "Sample feedback data!"
@@ -92,7 +93,7 @@ class TestGetFeedbackById:
             headers=auth_headers
         )
 
-        assert response.status_code == 404
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_get_feedback_by_id_for_nonexistent_bot_returns_404(self, client, auth_headers):
         response = client.get(
@@ -100,7 +101,7 @@ class TestGetFeedbackById:
             headers=auth_headers
         )
 
-        assert response.status_code == 404
+        assert response.status_code == status.HTTP_404_NOT_FOUND
 
     def test_get_feedback_by_id_without_auth_returns_401(
             self, client, auth_headers, invalid_auth_headers, created_bot, sample_feedback_data
@@ -117,6 +118,6 @@ class TestGetFeedbackById:
             headers=invalid_auth_headers
         )
 
-        assert response.status_code == 401
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
         supabase_admin.table("feedback").delete().eq("fb_id", feedback["fb_id"]).execute()

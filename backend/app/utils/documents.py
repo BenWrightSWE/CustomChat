@@ -1,5 +1,5 @@
 from app.crud import documents as crud
-from fastapi import HTTPException
+from fastapi import HTTPException, status
 from app.schemas.documents import DocumentResponse
 
 
@@ -15,7 +15,7 @@ def get_document_and_storage_path_by_id(
     """
     document = crud.get_document_by_id(bot_id, doc_id)
     if not document:
-        raise HTTPException(status_code=404, detail="Document not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
 
     doc_name_type = f"{document['doc_name']}{document['doc_type']}"
     storage_path = f"documents/{bot_id}/{doc_name_type}"
