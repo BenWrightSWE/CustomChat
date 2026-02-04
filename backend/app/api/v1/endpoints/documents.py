@@ -1,7 +1,9 @@
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, BackgroundTasks, Form, File, status
 from fastapi.responses import FileResponse
 from app.schemas.documents import DocumentCreate, DocumentResponse
+from app.schemas.vectors import VectorCreate
 from app.crud import documents as crud
+from app.crud import vectors as vector_crud
 from app.core.security import verify_bot_ownership
 from app.utils.storage import (
     upload_file_to_storage,
@@ -9,6 +11,7 @@ from app.utils.storage import (
     delete_file_from_storage,
 )
 from app.utils.documents import get_document_and_storage_path_by_id
+import requests
 import tempfile
 import os
 
@@ -27,6 +30,7 @@ ALLOWED_CONTENT_TYPES = {
 
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
 
+EMBEDDING_API_URL = os.getenv("EMBEDDING_API_URL")
 
 @router.post(
     "/", response_model=DocumentResponse, status_code=status.HTTP_201_CREATED
@@ -64,9 +68,27 @@ async def create_document(
                 storage_path, file_content, file.content_type, upsert="true"
             )
 
-            return crud.create_document(
+            rdb_doc = crud.create_document(
                 bot_id, doc_data
             )  # creates document in relational db
+
+            response = requests.post(
+                f"{EMBEDDING_API_URL}/embed/txt",
+                json={"document": file_content.decode("utf-8")},
+                headers={"X-API-KEY": os.getenv("EMBEDDING_API_KEY")}
+            )
+
+            embed_data = response.json()
+
+            # Convert to VectorCreate objects
+            vector_objects = [
+                VectorCreate(context=obj["chunk"], embedding=obj["embedding"])
+                for obj in embed_data["embedding_objects"]
+            ]
+
+            vector_crud.create_vectors(bot_id, rdb_doc["doc_id"], vector_objects)
+
+            return rdb_doc
     except HTTPException:
         raise
     except Exception as e:

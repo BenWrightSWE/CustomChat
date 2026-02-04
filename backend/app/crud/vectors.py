@@ -1,16 +1,18 @@
 from app.schemas.vectors import VectorCreate, VectorSearch
 from app.core.supabase import supabase_admin
+from typing import List
 
 NEIGHBOR_LIMIT = 5
 
 
-def create_vector(bot_id: int, doc_id: int, vector_data: VectorCreate):
-    vec_dict = vector_data.model_dump()
-    vec_dict["bot_id"] = bot_id
-    vec_dict["doc_id"] = doc_id
+def create_vectors(bot_id: int, doc_id: int, vector_data: List[VectorCreate]):
+    vectors_to_insert = [
+        {**v.model_dump(), "bot_id": bot_id, "doc_id": doc_id}
+        for v in vector_data
+    ]
 
-    response = supabase_admin.table("vectors").insert(vec_dict).execute()
-    return response.data[0]
+    response = supabase_admin.table("vectors").insert(vectors_to_insert).execute()
+    return response.data
 
 
 def get_vector_neighbors(doc_id: int, vector_embedding: VectorSearch):
