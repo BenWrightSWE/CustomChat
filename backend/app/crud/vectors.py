@@ -3,6 +3,7 @@ from app.core.supabase import supabase_admin
 
 NEIGHBOR_LIMIT = 5
 
+
 def create_vector(bot_id: int, doc_id: int, vector_data: VectorCreate):
     vec_dict = vector_data.model_dump()
     vec_dict["bot_id"] = bot_id
