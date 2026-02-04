@@ -7,5 +7,4 @@ class TxtDocumentRequest(BaseModel):
 
 
 class EmbedResponse(BaseModel):
-    chunks: List[str]
     embeddings: List[List[float]]

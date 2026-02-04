@@ -20,10 +20,7 @@ def embed_txt_document(request: TxtDocumentRequest):
 
         chunks = main.chunk_client.chunk_document(request.document)
         embeddings = main.embed_client.embed_document(chunks)
-        return {
-            "chunks": chunks,
-            "embeddings": embeddings.tolist()
-        }
+        return {"embeddings": embeddings.tolist()}
     except HTTPException:
         raise
     except Exception as e:
@@ -35,3 +32,4 @@ def embed_txt_document(request: TxtDocumentRequest):
 # implement for pdf
 
 # implement for docx
+
