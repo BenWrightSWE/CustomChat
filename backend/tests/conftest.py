@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 from pathlib import Path
 
+
 env_path = Path(__file__).resolve().parents[1] / ".env"
 load_dotenv(dotenv_path=env_path)
 
@@ -113,7 +114,7 @@ def invalid_auth_headers():
     Usage:
         def test_unauthorized(client, invalid_auth_headers):
             response = client.get("/protected", headers=invalid_auth_headers)
-            assert response.status_code == 401
+            assert response.status_code == status.HTTP_401_UNAUTHORIZED
     """
     return {"Authorization": "Bearer invalid_token"}
 

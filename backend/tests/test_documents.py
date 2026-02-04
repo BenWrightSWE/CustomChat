@@ -4,6 +4,8 @@ from tests.conftest import (
     TEST_TXT_SIZE,
     API_PREFIX
 )
+from fastapi import status
+
 
 
 class TestCreateDocument:
@@ -23,7 +25,7 @@ class TestCreateDocument:
             headers=auth_headers
         )
 
-        assert response.status_code == 201
+        assert response.status_code == status.HTTP_201_CREATED
         json_data = response.json()
         assert json_data["doc_name"] == "test"
         assert json_data["doc_type"] == ".txt"
@@ -51,7 +53,7 @@ class TestCreateDocument:
             headers=auth_headers
         )
 
-        assert response.status_code == 400
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "File type not allowed" in response.json()["detail"]
 
     def test_create_doc_size_exceeds_returns_400(self, client, auth_headers, created_bot, large_file):
@@ -70,7 +72,7 @@ class TestCreateDocument:
             headers=auth_headers
         )
 
-        assert response.status_code == 400
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
         assert "File too large" in response.json()["detail"]
 
     def test_create_doc_duplicate_returns_409(self, client, auth_headers, created_bot, sample_txt_file):
@@ -87,7 +89,7 @@ class TestCreateDocument:
             data=data,
             headers=auth_headers
         )
-        assert first_response.status_code == 201
+        assert first_response.status_code == status.HTTP_201_CREATED
         doc_id = first_response.json()["doc_id"]
 
         sample_txt_file.seek(0)  # Reset file pointer
@@ -98,7 +100,7 @@ class TestCreateDocument:
             headers=auth_headers
         )
 
-        assert second_response.status_code == 409
+        assert second_response.status_code == status.HTTP_409_CONFLICT
         assert "Document already exists" in second_response.json()["detail"]
 
         client.delete(f"{API_PREFIX}/bots/{created_bot["bot_id"]}/documents/{doc_id}", headers=auth_headers)
@@ -118,7 +120,7 @@ class TestCreateDocument:
             headers=invalid_auth_headers
         )
 
-        assert response.status_code == 401
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_create_doc_for_nonexistent_bot_returns_404(self, client, auth_headers, sample_txt_file):
         files = {"file": ("test.txt", sample_txt_file, "text/plain")}
@@ -135,7 +137,7 @@ class TestCreateDocument:
             headers=auth_headers
         )
 
-        assert response.status_code == 404
+        assert response.status_code == status.HTTP_404_NOT_FOUND
         assert "Bot not found" in response.json()["detail"]
 
 
@@ -147,7 +149,7 @@ class TestGetAllDocuments:
             headers=auth_headers
         )
 
-        assert response.status_code == 200
+        assert response.status_code == status.HTTP_200_OK
         assert isinstance(response.json(), list)
 
     def test_get_documents_without_auth_returns_401(self, client, invalid_auth_headers, created_bot):
@@ -156,7 +158,7 @@ class TestGetAllDocuments:
             headers=invalid_auth_headers
         )
 
-        assert response.status_code == 401
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_get_documents_for_nonexistent_bot_returns_404(self, client, auth_headers):
         response = client.get(
@@ -164,7 +166,7 @@ class TestGetAllDocuments:
             headers=auth_headers
         )
 
-        assert response.status_code == 404
+        assert response.status_code == status.HTTP_404_NOT_FOUND
         assert "Bot not found" in response.json()["detail"]
 
 
@@ -180,7 +182,7 @@ class TestGetDocumentById:
         )
 
         # Assert
-        assert response.status_code == 200
+        assert response.status_code == status.HTTP_200_OK
         json_data = response.json()
         assert json_data["doc_id"] == doc_id
         assert json_data["bot_id"] == bot_id
@@ -197,7 +199,7 @@ class TestGetDocumentById:
             headers=invalid_auth_headers
         )
 
-        assert response.status_code == 401
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_get_document_by_id_for_nonexistent_bot_returns_404(self, client, auth_headers):
         doc_id = 1
@@ -207,7 +209,7 @@ class TestGetDocumentById:
             headers=auth_headers
         )
 
-        assert response.status_code == 404
+        assert response.status_code == status.HTTP_404_NOT_FOUND
         assert "Bot not found" in response.json()["detail"]
 
     def test_get_document_by_id_for_nonexistent_doc_returns_404(self, client, auth_headers, created_bot):
@@ -216,7 +218,7 @@ class TestGetDocumentById:
             headers=auth_headers
         )
 
-        assert response.status_code == 404
+        assert response.status_code == status.HTTP_404_NOT_FOUND
         assert "Document not found" in response.json()["detail"]
 
 
@@ -230,7 +232,7 @@ class TestDownloadDocumentById:
             headers=auth_headers
         )
 
-        assert response.status_code == 200
+        assert response.status_code == status.HTTP_200_OK
         assert response.content
         assert len(response.content) > 0
         assert "content-type" in response.headers
@@ -244,7 +246,7 @@ class TestDownloadDocumentById:
             headers=invalid_auth_headers
         )
 
-        assert response.status_code == 401
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
     def test_download_documents_by_id_for_nonexistent_bot_returns_404(self, client, auth_headers):
         doc_id = 1
@@ -254,7 +256,7 @@ class TestDownloadDocumentById:
             headers=auth_headers
         )
 
-        assert response.status_code == 404
+        assert response.status_code == status.HTTP_404_NOT_FOUND
         assert "Bot not found" in response.json()["detail"]
 
     def test_download_documents_by_id_for_nonexistent_doc_returns_404(self, client, auth_headers, created_bot):
@@ -263,7 +265,7 @@ class TestDownloadDocumentById:
             headers=auth_headers
         )
 
-        assert response.status_code == 404
+        assert response.status_code == status.HTTP_404_NOT_FOUND
         assert "Document not found" in response.json()["detail"]
 
 
@@ -288,7 +290,7 @@ class TestDeleteDocumentById:
             headers=auth_headers
         )
 
-        assert response.status_code == 204
+        assert response.status_code == status.HTTP_204_NO_CONTENT
         assert response.content == b""  # No content
 
     def test_delete_document_by_id_for_nonexistent_bot_returns_404(self, client, auth_headers):
@@ -299,7 +301,7 @@ class TestDeleteDocumentById:
             headers=auth_headers
         )
 
-        assert response.status_code == 404
+        assert response.status_code == status.HTTP_404_NOT_FOUND
         assert "Bot not found" in response.json()["detail"]
 
     def test_delete_document_by_id_for_nonexistent_doc_returns_404(self, client, auth_headers, created_bot):
@@ -308,7 +310,7 @@ class TestDeleteDocumentById:
             headers=auth_headers
         )
 
-        assert response.status_code == 404
+        assert response.status_code == status.HTTP_404_NOT_FOUND
         assert "Document not found" in response.json()["detail"]
 
     def test_delete_document_by_id_without_auth_returns_401(self, client, invalid_auth_headers, created_document):
@@ -320,5 +322,5 @@ class TestDeleteDocumentById:
             headers=invalid_auth_headers
         )
 
-        assert response.status_code == 401
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
