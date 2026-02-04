@@ -16,6 +16,8 @@ class TestEmbedTxtDocument:
         embedded_vals = response.json()
         assert isinstance(embedded_vals["embeddings"], list)
         assert len(embedded_vals["embeddings"]) > 0
+        assert isinstance(embedded_vals["chunks"], list)
+        assert len(embedded_vals["chunks"]) > 0
 
     def test_embed_txt_doc_size_exceeds_returns_413(self, client, test_api_key, sample_large_txt_file):
         response = client.post(
