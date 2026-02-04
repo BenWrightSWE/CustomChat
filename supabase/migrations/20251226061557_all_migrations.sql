@@ -71,12 +71,4 @@ create extension vector
 with
     schema extensions;
 
-CREATE TABLE vectors (
-    vec_id BIGSERIAL PRIMARY KEY,
-    doc_id BIGINT REFERENCES documents(doc_id) ON DELETE CASCADE,
-    bot_id BIGINT REFERENCES bots(bot_id) ON DELETE CASCADE,
-    context TEXT NOT NULL,
-    embedding extensions.vector(512) NOT NULL
-);
-
 -- Table storing the vectorized documents
