@@ -67,9 +67,12 @@ values
 
 -- enabling the vector database ability with supabase
 -- docs : https://supabase.com/docs/guides/database/extensions/pgvector
+
 create extension vector
 with
     schema extensions;
+
+-- Table storing the vectorized document chunks
 
 CREATE TABLE vectors (
     vec_id BIGSERIAL PRIMARY KEY,
@@ -78,5 +81,3 @@ CREATE TABLE vectors (
     context TEXT NOT NULL,
     embedding extensions.vector(768) NOT NULL
 );
-
--- Table storing the vectorized documents

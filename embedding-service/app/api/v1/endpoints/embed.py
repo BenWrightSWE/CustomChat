@@ -39,3 +39,4 @@ def embed_txt_document(request: TxtDocumentRequest):
 # implement for pdf
 
 # implement for docx
+

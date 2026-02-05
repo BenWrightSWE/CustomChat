@@ -14,6 +14,7 @@ class TestEmbedTxtDocument:
         print(response.json)
         assert response.status_code == status.HTTP_200_OK
         embedded_vals = response.json()
+
         assert isinstance(embedded_vals["embedding_objects"], list)
         assert len(embedded_vals["embedding_objects"]) > 0
 
