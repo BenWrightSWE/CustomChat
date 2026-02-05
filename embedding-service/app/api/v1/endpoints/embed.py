@@ -3,7 +3,8 @@ from app import main
 from app.core.config import settings
 from app.schemas.embed import (
     TxtDocumentRequest,
-    EmbedResponse
+    EmbedResponse,
+    EmbedObject
 )
 
 router = APIRouter()
@@ -20,7 +21,13 @@ def embed_txt_document(request: TxtDocumentRequest):
 
         chunks = main.chunk_client.chunk_document(request.document)
         embeddings = main.embed_client.embed_document(chunks)
-        return {"embeddings": embeddings.tolist()}
+
+        embed_objects = [
+            EmbedObject(chunk=k, embedding=v.tolist())  # Convert numpy array to list
+            for k, v in zip(chunks, embeddings)
+        ]
+
+        return EmbedResponse(embedding_objects=embed_objects)
     except HTTPException:
         raise
     except Exception as e:
@@ -32,4 +39,3 @@ def embed_txt_document(request: TxtDocumentRequest):
 # implement for pdf
 
 # implement for docx
-

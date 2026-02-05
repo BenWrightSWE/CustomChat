@@ -6,5 +6,10 @@ class TxtDocumentRequest(BaseModel):
     document: str = Field(..., min_length=1)
 
 
+class EmbedObject(BaseModel):
+    chunk: str
+    embedding: List[float]
+
+
 class EmbedResponse(BaseModel):
-    embeddings: List[List[float]]
+    embedding_objects: List[EmbedObject]
