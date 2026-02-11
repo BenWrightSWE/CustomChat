@@ -13,9 +13,16 @@ from openai_harmony import (
     ReasoningEffort,
 )
 
-MODEL_ID = "openai/gpt-oss-20b"
+# Choose the model that works best for current use case
+# Light model (unit testing, 3.8b): "microsoft/Phi-3-mini-4k-instruct"
+# Medium model (manual testing, 7b): "mistralai/Mistral-7B-Instruct-v0.2"
+# Heavy model (closer to prod, 20b): "openai/gpt-oss-20b"
+MODEL_ID = "microsoft/Phi-3-mini-4k-instruct"
+
 MAX_TOKENS = 100
 MAX_CONVO_HISTORY = 10
+
+_llm_instance = None
 
 
 class LLMClient:
@@ -23,7 +30,7 @@ class LLMClient:
         self.pipe = pipeline(
             "text-generation",
             model=MODEL_ID,
-            torch_dtype="auto",
+            torch_dtype="mps",
             device_map="auto",
         )
 
@@ -65,9 +72,9 @@ class LLMClient:
                     f"User asks: {user_input} we need to get question context.",
                 ).with_channel("analysis"),
                 Message.from_role_and_content(Role.ASSISTANT, user_input)
-                .with_channel("commentary")
-                .with_recipient("functions.get_question_context")
-                .with_content_type("<|constrain|> json"),
+            .with_channel("commentary")
+            .with_recipient("functions.get_question_context")
+            .with_content_type("<|constrain|> json"),
                 Message.from_author_and_content(
                     Author.new(Role.TOOL, "functions.get_question_context"),
                     context
@@ -82,7 +89,11 @@ class LLMClient:
             max_new_tokens=MAX_TOKENS,
         )
 
-        return outputs[0]["generated_text"][-1]
+        return outputs[0]["generated_text"]
 
 
-
+def get_llm() -> LLMClient:
+    global _llm_instance
+    if _llm_instance is None:
+        _llm_instance = LLMClient()
+    return _llm_instance
