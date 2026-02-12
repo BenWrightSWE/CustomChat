@@ -1,5 +1,4 @@
 from pydantic_settings import BaseSettings
-import os
 
 class Settings(BaseSettings):
     EMBEDDING_API_KEY: str
@@ -12,7 +11,7 @@ class Settings(BaseSettings):
         return self.MAX_DOCUMENT_SIZE_MB * 1024 * 1024
 
     class Config:
-        env_file = ".env.test"
+        env_file = ".env"
 
 
 settings = Settings()
