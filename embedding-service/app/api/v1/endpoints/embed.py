@@ -2,14 +2,30 @@ from fastapi import APIRouter, status, HTTPException
 from app import main
 from app.core.config import settings
 from app.schemas.embed import (
+    UserInputRequest,
     TxtDocumentRequest,
-    EmbedResponse,
+    DocumentEmbedResponse,
+    UserInputEmbedResponse,
     EmbedObject
 )
 
 router = APIRouter()
 
-@router.post("/txt", response_model=EmbedResponse)
+@router.post("/user_input", response_model=UserInputEmbedResponse)
+def embed_user_input(request: UserInputRequest):
+    try:
+        embedding = main.embed_client.embed_input(request.user_input)
+
+        return EmbedObject(chunk=request.user_input, embedding=embedding.tolist())
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error while embedding document"
+        )
+
+@router.post("/txt", response_model=DocumentEmbedResponse)
 def embed_txt_document(request: TxtDocumentRequest):
     try:
         doc_size = len(request.document.encode('utf-8'))
@@ -27,7 +43,7 @@ def embed_txt_document(request: TxtDocumentRequest):
             for k, v in zip(chunks, embeddings)
         ]
 
-        return EmbedResponse(embedding_objects=embed_objects)
+        return DocumentEmbedResponse(embedding_objects=embed_objects)
     except HTTPException:
         raise
     except Exception as e:

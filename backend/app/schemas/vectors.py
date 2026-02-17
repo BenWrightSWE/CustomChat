@@ -20,7 +20,7 @@ class VectorCreateResponse(VectorBase):
         from_attributes = True  # Allows Pydantic to read data from database models
 
 
-class VectorSearchBase(BaseModel):
+class SearchableVector(BaseModel):
     embedding: List[float]
 
 
