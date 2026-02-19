@@ -2,17 +2,6 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
 from app.schemas.llm import ChatMessage
 from typing import List
-from openai_harmony import (
-    Author,
-    Conversation,
-    DeveloperContent,
-    HarmonyEncodingName,
-    Message,
-    Role,
-    SystemContent,
-    load_harmony_encoding,
-    ReasoningEffort,
-)
 
 MODEL_ID = "mistralai/Mistral-7B-Instruct-v0.2"
 

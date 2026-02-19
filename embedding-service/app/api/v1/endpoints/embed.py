@@ -11,19 +11,21 @@ from app.schemas.embed import (
 
 router = APIRouter()
 
+
 @router.post("/user_input", response_model=UserInputEmbedResponse)
 def embed_user_input(request: UserInputRequest):
     try:
         embedding = main.embed_client.embed_input(request.user_input)
-
-        return EmbedObject(chunk=request.user_input, embedding=embedding.tolist())
+        return UserInputEmbedResponse(chunk=request.user_input, embedding=embedding.tolist())
     except HTTPException:
         raise
     except Exception as e:
+        print(e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error while embedding document"
+            detail="Internal server error while embedding user input"
         )
+
 
 @router.post("/txt", response_model=DocumentEmbedResponse)
 def embed_txt_document(request: TxtDocumentRequest):

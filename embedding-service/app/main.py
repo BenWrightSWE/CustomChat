@@ -8,8 +8,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.router import api_router
-from app.core.chunk_client import ChunkClient
-from app.core.embed_client import EmbedClient
+from app.core.chunk_client import get_chunker
+from app.core.embed_client import get_embedder
 from app.api.deps import get_api_key
 
 chunk_client = None
@@ -20,8 +20,8 @@ async def lifespan(app: FastAPI):
     global chunk_client, embed_client
 
     print("Loading models...")
-    chunk_client = ChunkClient()
-    embed_client = EmbedClient()
+    chunk_client = get_chunker()
+    embed_client = get_embedder()
     print("Models loaded")
 
     yield
