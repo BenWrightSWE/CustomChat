@@ -2,50 +2,45 @@ from fastapi import APIRouter, HTTPException, Depends, status
 from app.schemas.vectors import SearchableVector
 from app.schemas.assistant import (
     AssistantResponse,
-    AssistantRequest
+    AssistantRequest,
 )
-from app.crud import vectors as vector_crud
-import requests
-import os
-
-EMBEDDING_API_URL = os.getenv("EMBEDDING_API_URL")
-LLM_API_URL = os.getenv("EMBEDDING_API_URL")
+from app.utils.assistant import (
+    get_api_embedding,
+    get_llm_api_response
+)
+from app.crud.vectors import get_vector_neighbors
+from app.crud.bots import does_bot_exist
 
 router = APIRouter()
+
 
 @router.post("/assistant", response_model=AssistantResponse)
 def bot_contextual_response(bot_id: int, request_data: AssistantRequest):
     try:
+        if not does_bot_exist(bot_id):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bot not found")
+
         passed_values = request_data.model_dump()
 
-        embed_response = requests.post(
-            f"{EMBEDDING_API_URL}/embed/user_input",
-            json={"user_input": passed_values.user_input},
-            headers={"X-API-KEY": os.getenv("EMBEDDING_API_KEY")}
+        user_input_vector = SearchableVector(
+            embedding=get_api_embedding(passed_values["user_input"])
         )
 
-        user_input_vector = SearchableVector(embedding=embed_response.json().embedding)
-
-        neighbor_results = vector_crud.get_vector_neighbors(bot_id, user_input_vector)
+        neighbor_results = get_vector_neighbors(bot_id, user_input_vector)["neighbors"]
 
         context_strings = []
 
         for result in neighbor_results:
             context_strings.append(result["context"])
 
-        llm_request = {
-            "chat_history": passed_values.chat_history,
-            "input_context": context_strings,
-            "user_input": passed_values.user_input
-        }
-
-        llm_response = requests.post(
-            f"{LLM_API_URL}/{bot_id}/assistant",
-            json=llm_request,
-            headers={"X-API-KEY": os.getenv("LLM_API_KEY")}
+        return AssistantResponse(
+            role="ASSISTANT",
+            message=get_llm_api_response(
+                passed_values["chat_history"],
+                context_strings,
+                passed_values["user_input"]
+            )
         )
-
-        return llm_response.model_dump().response
 
     except HTTPException:
         raise

@@ -7,10 +7,10 @@ class ChatMessage(BaseModel):
     message: str
 
 
-class AssistantRequest:
+class AssistantRequest(BaseModel):
     chat_history: List[ChatMessage]
     user_input: str
 
 
-class AssistantResponse:
-    response: ChatMessage
+class AssistantResponse(ChatMessage):
+    pass

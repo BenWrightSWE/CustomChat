@@ -1,4 +1,4 @@
-from tests.conftest import API_PREFIX
+from tests.unit.conftest import API_PREFIX
 from fastapi import status
 
 

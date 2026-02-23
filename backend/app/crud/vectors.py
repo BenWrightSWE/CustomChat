@@ -1,4 +1,4 @@
-from app.schemas.vectors import VectorCreate, SearchableVector
+from app.schemas.vectors import VectorCreate, SearchableVector, VectorSearchResponse
 from app.core.supabase import supabase_admin
 from typing import List
 
@@ -18,7 +18,7 @@ def create_vectors(bot_id: int, doc_id: int, vector_data: List[VectorCreate]):
 def get_vector_neighbors(bot_id: int, vector_embedding: SearchableVector):
     neighbor_query = """
         WITH relaxed_results AS MATERIALIZED (
-            SELECT vec_id, context, embedding <-> %s 
+            SELECT vec_id, context <-> %s 
             AS distance 
             FROM vectors 
             WHERE bot_id = %s
@@ -28,8 +28,8 @@ def get_vector_neighbors(bot_id: int, vector_embedding: SearchableVector):
     """
 
     result = supabase_admin.rpc('exec_sql', {
-        'query': neighbor_query,
-        'params': [vector_embedding["embedding"], bot_id, NEIGHBOR_LIMIT]
+        "query": neighbor_query,
+        "params": [vector_embedding["embedding"], bot_id, NEIGHBOR_LIMIT]
     }).execute()
 
-    return result.data
+    return VectorSearchResponse(neighbors=result.data)

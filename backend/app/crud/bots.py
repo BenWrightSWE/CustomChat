@@ -48,3 +48,14 @@ def delete_bot_by_id(user_id: str, bot_id: int):
         .execute()
     )
     return response.data
+
+
+# used to check if a bot exists without the caller having access to the bots data
+def does_bot_exist(bot_id: int) -> bool:
+    response = (
+        supabase_admin.table("bots")
+        .select("*")
+        .eq("bot_id", bot_id)
+        .execute()
+    )
+    return True if response.data else False
