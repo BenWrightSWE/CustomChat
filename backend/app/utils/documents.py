@@ -1,6 +1,11 @@
 from app.crud import documents as crud
 from fastapi import HTTPException, status
 from app.schemas.documents import DocumentResponse
+import requests
+import os
+
+
+EMBEDDING_API_URL = os.getenv("EMBEDDING_API_URL")
 
 
 # Not put in CRUD due to it not directly accessing the database.
@@ -20,3 +25,16 @@ def get_document_and_storage_path_by_id(
     doc_name_type = f"{document['doc_name']}{document['doc_type']}"
     storage_path = f"documents/{bot_id}/{doc_name_type}"
     return document, storage_path
+
+
+# Interacting with an API needed for create document endpoint
+def get_document_embed_data_from_api(file_content: str):
+    response = requests.post(
+        f"{EMBEDDING_API_URL}/embed/txt",
+        json={"document": file_content},
+        headers={"X-API-KEY": os.getenv("EMBEDDING_API_KEY")}
+    )
+
+    print(response.json())
+
+    return response.json()

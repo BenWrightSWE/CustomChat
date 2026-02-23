@@ -1,4 +1,4 @@
-from tests.conftest import (
+from tests.unit.conftest import (
     NONEXISTENT_BOT_ID,
     NONEXISTENT_FB_ID,
     API_PREFIX

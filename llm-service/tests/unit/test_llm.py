@@ -7,7 +7,6 @@ class TestLLMResponseWithContext:
     def test_llm_response_with_context_returns_200(
             self, client, test_api_key, sample_user_input, sample_context, sample_history
     ):
-
         llm_request = {
             "chat_history": sample_history,
             "input_context": sample_context,

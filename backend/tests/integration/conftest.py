@@ -7,10 +7,12 @@ load_dotenv(dotenv_path=env_path)
 
 import pytest
 from fastapi.testclient import TestClient
-from io import BytesIO
+
 from app.main import app
-import os
 from supabase import create_client
+
+from io import BytesIO
+import os
 
 API_PREFIX = "/api/v1"
 
@@ -33,6 +35,7 @@ def client():
             response = client.get("/endpoint")
     """
     return TestClient(app)
+
 
 
 # Authentication Fixtures
@@ -196,8 +199,6 @@ def sample_document_data():
 def sample_bot_data():
     """
     Provides sample bot data for creation.
-
-    Adjust fields based on your BotCreate schema.
     """
     return {
         "bot_name": "Test Bot",
@@ -213,8 +214,6 @@ def sample_bot_data():
 def sample_feedback_data():
     """
     Provides sample feedback data for creation.
-
-    Adjust fields based on your FeedbackCreate schema.
     """
     return {
         "fb_date": "2026-01-06",
@@ -222,6 +221,26 @@ def sample_feedback_data():
         "fb_desc": "Sample feedback data!",
         "is_neg": True,
         "use_log": None
+    }
+
+
+@pytest.fixture
+def sample_assistant_request():
+    """
+    Provides sample assistant request for llm response.
+    """
+    return {
+        "chat_history": [
+            {
+                "role": "USER",
+                "message": "Is this a test question?"
+            },
+            {
+                "role": "ASSISTANT",
+                "message": "Yes it is a test question?"
+            }
+        ],
+        "user_input": "What is an llm bot response?"
     }
 
 

@@ -30,7 +30,7 @@ async def test_lifespan(app):
 
 @pytest.fixture
 def app():
-    test_app = FastAPI(title="LLM API", version="1.0.0", lifespan=test_lifespan)
+    test_app = FastAPI(title="Mock LLM API", version="1.0.0", lifespan=test_lifespan)
 
     test_app.add_middleware(
         CORSMiddleware,
@@ -63,18 +63,6 @@ def client(app):
     """
     with TestClient(app) as client:
         yield client
-
-@pytest.fixture
-def mock_llm():
-    #@asynccontextmanager
-    #async def mock_lifespan(app: FastAPI):
-    #    yield
-
-    #app.router.lifespan_context = mock_lifespan
-
-    app.dependency_overrides[get_llm] = lambda: MockLLM()
-    yield
-    app.dependency_overrides.clear()
 
 
 @pytest.fixture

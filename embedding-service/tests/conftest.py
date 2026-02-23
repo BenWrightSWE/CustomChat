@@ -25,12 +25,25 @@ def client():
 
 
 @pytest.fixture
-def sample_txt_file():
+def sample_user_input():
     """
-    Returns a string that can be used for txt document chunking tests.
+    Returns a string that can be used for user input embedding tests.
 
     Usage:
         def test_txt_chunking(client, auth_headers, sample_txt_file):
+            files = {"file": ("test.txt", sample_txt_file, "text/plain")}
+            response = client.post("/embed/txt", files=files, headers=auth_headers)
+    """
+    return "What is a test user input?"
+
+
+@pytest.fixture
+def sample_txt_file():
+    """
+    Returns a string that can be used for txt document embedding tests.
+
+    Usage:
+        def test_txt_embed(client, auth_headers, sample_txt_file):
             files = {"file": ("test.txt", sample_txt_file, "text/plain")}
             response = client.post("/embed/txt", files=files, headers=auth_headers)
     """
@@ -40,10 +53,10 @@ def sample_txt_file():
 @pytest.fixture
 def sample_large_txt_file():
     """
-    Returns a string exceeding 10mb that can be used for txt document chunking tests.
+    Returns a string exceeding 10mb that can be used for txt document embedding tests.
 
     Usage:
-        def test_txt_chunking(client, auth_headers, sample_txt_file):
+        def test_txt_embed(client, auth_headers, sample_txt_file):
             files = {"file": ("test.txt", sample_txt_file, "text/plain")}
             response = client.post("/embed/txt", files=files, headers=auth_headers)
     """
@@ -52,4 +65,7 @@ def sample_large_txt_file():
 
 @pytest.fixture
 def test_api_key():
+    """
+        Returns the API key that allows use of the API.
+    """
     return {"X-API-KEY": os.getenv("EMBEDDING_API_KEY")}

@@ -10,8 +10,10 @@ from app.utils.storage import (
     download_file_from_storage,
     delete_file_from_storage,
 )
-from app.utils.documents import get_document_and_storage_path_by_id
-import requests
+from app.utils.documents import (
+    get_document_and_storage_path_by_id,
+    get_document_embed_data_from_api
+)
 import tempfile
 import os
 
@@ -21,7 +23,6 @@ creating in storage then in db makes it sothat it won't show up to user if it fa
 the storage.
 """
 
-
 router = APIRouter()
 
 ALLOWED_CONTENT_TYPES = {
@@ -29,8 +30,6 @@ ALLOWED_CONTENT_TYPES = {
 }
 
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
-
-EMBEDDING_API_URL = os.getenv("EMBEDDING_API_URL")
 
 @router.post(
     "/", response_model=DocumentResponse, status_code=status.HTTP_201_CREATED
@@ -72,13 +71,7 @@ async def create_document(
                 bot_id, doc_data
             )  # creates document in relational db
 
-            response = requests.post(
-                f"{EMBEDDING_API_URL}/embed/txt",
-                json={"document": file_content.decode("utf-8")},
-                headers={"X-API-KEY": os.getenv("EMBEDDING_API_KEY")}
-            )
-
-            embed_data = response.json()
+            embed_data = get_document_embed_data_from_api(file_content.decode("utf-8"))
 
             # Convert to VectorCreate objects
             vector_objects = [

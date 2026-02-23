@@ -1,4 +1,4 @@
-from tests.conftest import NONEXISTENT_BOT_ID, API_PREFIX
+from tests.unit.conftest import NONEXISTENT_BOT_ID, API_PREFIX
 from fastapi import status
 
 
