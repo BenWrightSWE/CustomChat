@@ -1,0 +1,1 @@
+SELECT * FROM vault.secrets LIMIT 1;

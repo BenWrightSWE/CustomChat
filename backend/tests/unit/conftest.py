@@ -325,7 +325,7 @@ def created_bot(client, auth_headers, sample_bot_data):
             response = client.get(f"/bots/{test_bot_id}")
     """
     response = client.post(f"{API_PREFIX}/bots", json=sample_bot_data, headers=auth_headers)
-    bot = response.json()
+    bot = response.json()["bot_info"]
 
     yield bot
 

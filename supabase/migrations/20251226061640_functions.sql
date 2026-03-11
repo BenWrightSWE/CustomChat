@@ -56,14 +56,12 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
-
 -- Drop and then Create the trigger to ensure idempotency (no "already exists" error)
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_new_user();
-
 
 -- Trigger to sync email changes from auth.users to users table
 CREATE OR REPLACE FUNCTION sync_user_email()
@@ -83,3 +81,13 @@ CREATE TRIGGER on_auth_user_email_updated
   EXECUTE FUNCTION sync_user_email();
 
 -- How to update email with the trigger: supabase_admin.auth.admin.update_user_by_id(user_id, {"email": new_email})
+
+CREATE OR REPLACE FUNCTION public.insert_secret(secret TEXT)
+RETURNS UUID
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  RETURN vault.create_secret(secret);
+END;
+$$;

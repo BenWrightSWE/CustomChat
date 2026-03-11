@@ -21,7 +21,8 @@ CREATE TABLE bots (
     avatar TEXT,
     color TEXT,
     storage INT, -- KB used in document storage
-    uses INT -- perhaps switch to bigint if thought needed
+    uses INT, -- perhaps switch to bigint if thought needed
+    vault_uuid UUID -- reference for API key in vaults
 );
 
 -- Table storing the documents relating to each bot.
@@ -71,6 +72,7 @@ create extension vector
 with
     schema extensions;
 
+-- Table storing the vectorized document embeddings
 CREATE TABLE vectors (
     vec_id BIGSERIAL PRIMARY KEY,
     doc_id BIGINT REFERENCES documents(doc_id) ON DELETE CASCADE,
@@ -79,4 +81,9 @@ CREATE TABLE vectors (
     embedding extensions.vector(768) NOT NULL
 );
 
--- Table storing the vectorized documents
+
+-- SECRETS
+
+CREATE EXTENSION IF NOT EXISTS supabase_vault CASCADE;
+
+

@@ -12,13 +12,18 @@ class TestCreateBot:
 
         assert response.status_code == status.HTTP_201_CREATED
         json_data = response.json()
-        assert json_data["bot_name"] == "Test Bot"
-        assert json_data["bot_desc"] == "A bot for testing"
-        assert json_data["avatar"] == "base"
-        assert json_data["color"] == "tan"
-        assert json_data["storage"] == 0
-        assert json_data["uses"] == 0
-        assert "bot_id" in json_data
+        assert json_data["bot_info"]["bot_name"] == "Test Bot"
+        assert json_data["bot_info"]["bot_desc"] == "A bot for testing"
+        assert json_data["bot_info"]["avatar"] == "base"
+        assert json_data["bot_info"]["color"] == "tan"
+        assert json_data["bot_info"]["storage"] == 0
+        assert json_data["bot_info"]["uses"] == 0
+        assert "bot_id" in json_data["bot_info"]
+
+        assert "bot_api_key" in json_data
+        assert json_data["bot_api_key"].startswith("bot_response_")
+        assert len(json_data["bot_api_key"]) > 20
+        print(json_data["bot_api_key"])
 
     def test_create_bot_without_auth_returns_401(self, client, invalid_auth_headers, sample_bot_data):
         response = client.post(
@@ -172,7 +177,7 @@ class TestUpdateBotByID:
 class TestDeleteBotByID:
     def test_delete_bot_by_id_returns_204(self, client, auth_headers, sample_bot_data):
         set_up_response = client.post(f"{API_PREFIX}/bots", json=sample_bot_data, headers=auth_headers)
-        bot = set_up_response.json()
+        bot = set_up_response.json()["bot_info"]
 
         response = client.delete(
             f"{API_PREFIX}/bots/{bot["bot_id"]}",
@@ -193,7 +198,7 @@ class TestDeleteBotByID:
             self, client, auth_headers, invalid_auth_headers, sample_bot_data
     ):
         set_up_response = client.post(f"{API_PREFIX}/bots", json=sample_bot_data, headers=auth_headers)
-        bot = set_up_response.json()
+        bot = set_up_response.json()["bot_info"]
 
         response = client.delete(
             f"{API_PREFIX}/bots/{bot["bot_id"]}",

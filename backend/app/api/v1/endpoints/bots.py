@@ -1,16 +1,20 @@
 from fastapi import APIRouter, HTTPException, Depends, status
-from app.schemas.bots import BotCreate, BotUpdate, BotResponse
+from app.schemas.bots import BotCreate, BotCreateResponse, BotUpdate, BotResponse
 from app.crud import bots as crud
 from app.core.security import get_current_user, verify_bot_ownership
 
 router = APIRouter()
 
 
-@router.post("/", response_model=BotResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=BotCreateResponse, status_code=status.HTTP_201_CREATED)
 def create_bot(bot_data: BotCreate, current_user: dict = Depends(get_current_user)):
     # Need to add a checker for the bot data
     try:
-        return crud.create_bot(current_user["id"], bot_data)
+        response = crud.create_bot(current_user["id"], bot_data)
+        return {
+            "bot_info": response[0],
+            "bot_api_key": response[1]
+        }
     except Exception as e:
         print(f"Error creating bot: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error while creating bot")
