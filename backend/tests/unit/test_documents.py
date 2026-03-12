@@ -19,7 +19,7 @@ class TestCreateDocument:
         }
 
         response = client.post(
-            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/documents",
+            f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}/documents",
             files=files,
             data=data,
             headers=auth_headers
@@ -32,7 +32,7 @@ class TestCreateDocument:
         assert "doc_id" in json_data
 
         client.delete(
-            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/documents/{json_data['doc_id']}",
+            f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}/documents/{json_data['doc_id']}",
             headers=auth_headers
         )
 
@@ -47,7 +47,7 @@ class TestCreateDocument:
         }
 
         response = client.post(
-            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/documents",
+            f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}/documents",
             files=files,
             data=data,
             headers=auth_headers
@@ -66,7 +66,7 @@ class TestCreateDocument:
         }
 
         response = client.post(
-            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/documents",
+            f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}/documents",
             files=files,
             data=data,
             headers=auth_headers
@@ -84,7 +84,7 @@ class TestCreateDocument:
         }
 
         first_response = client.post(
-            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/documents",
+            f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}/documents",
             files=files,
             data=data,
             headers=auth_headers
@@ -94,7 +94,7 @@ class TestCreateDocument:
 
         sample_txt_file.seek(0)  # Reset file pointer
         second_response = client.post(
-            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/documents",
+            f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}/documents",
             files=files,
             data=data,
             headers=auth_headers
@@ -103,7 +103,7 @@ class TestCreateDocument:
         assert second_response.status_code == status.HTTP_409_CONFLICT
         assert "Document already exists" in second_response.json()["detail"]
 
-        client.delete(f"{API_PREFIX}/bots/{created_bot["bot_id"]}/documents/{doc_id}", headers=auth_headers)
+        client.delete(f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}/documents/{doc_id}", headers=auth_headers)
 
     def test_create_doc_without_auth_returns_401(self, client, invalid_auth_headers, created_bot, sample_txt_file):
         files = {"file": ("test.txt", sample_txt_file, "text/plain")}
@@ -114,7 +114,7 @@ class TestCreateDocument:
         }
 
         response = client.post(
-            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/documents",
+            f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}/documents",
             files=files,
             data=data,
             headers=invalid_auth_headers
@@ -145,7 +145,7 @@ class TestGetAllDocuments:
 
     def test_get_documents_returns_200_and_document_list(self, client, auth_headers, created_bot):
         response = client.get(
-            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/documents",
+            f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}/documents",
             headers=auth_headers
         )
 
@@ -154,7 +154,7 @@ class TestGetAllDocuments:
 
     def test_get_documents_without_auth_returns_401(self, client, invalid_auth_headers, created_bot):
         response = client.get(
-            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/documents",
+            f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}/documents",
             headers=invalid_auth_headers
         )
 
@@ -214,7 +214,7 @@ class TestGetDocumentById:
 
     def test_get_document_by_id_for_nonexistent_doc_returns_404(self, client, auth_headers, created_bot):
         response = client.get(
-            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/documents/{NONEXISTENT_DOC_ID}",
+            f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}/documents/{NONEXISTENT_DOC_ID}",
             headers=auth_headers
         )
 
@@ -261,7 +261,7 @@ class TestDownloadDocumentById:
 
     def test_download_documents_by_id_for_nonexistent_doc_returns_404(self, client, auth_headers, created_bot):
         response = client.get(
-            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/documents/{NONEXISTENT_DOC_ID}/download",
+            f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}/documents/{NONEXISTENT_DOC_ID}/download",
             headers=auth_headers
         )
 
@@ -278,7 +278,7 @@ class TestDeleteDocumentById:
             "doc_size": TEST_TXT_SIZE
         }
         create_response = client.post(
-            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/documents",
+            f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}/documents",
             files=files,
             data=data,
             headers=auth_headers
@@ -286,7 +286,7 @@ class TestDeleteDocumentById:
         doc_id = create_response.json()["doc_id"]
 
         response = client.delete(
-            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/documents/{doc_id}",
+            f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}/documents/{doc_id}",
             headers=auth_headers
         )
 
@@ -306,7 +306,7 @@ class TestDeleteDocumentById:
 
     def test_delete_document_by_id_for_nonexistent_doc_returns_404(self, client, auth_headers, created_bot):
         response = client.delete(
-            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/documents/{NONEXISTENT_DOC_ID}",
+            f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}/documents/{NONEXISTENT_DOC_ID}",
             headers=auth_headers
         )
 

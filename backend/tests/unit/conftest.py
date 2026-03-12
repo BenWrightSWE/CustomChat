@@ -295,7 +295,7 @@ def sample_feedback_data():
 @pytest.fixture
 def sample_assistant_request():
     """
-    Provides sample assistant request for llm response.
+    Provides sample assistant request for llm response, need to add ["bot_api_key"]
     """
     return {
         "chat_history": [
@@ -318,18 +318,18 @@ def sample_assistant_request():
 @pytest.fixture
 def created_bot(client, auth_headers, sample_bot_data):
     """
-    Creates a test bot and return its ID. Cleans up after test.
+    Creates a test bot and return its values.
 
     Usage:
         def test_something(client, auth_headers, test_bot_id):
             response = client.get(f"/bots/{test_bot_id}")
     """
     response = client.post(f"{API_PREFIX}/bots", json=sample_bot_data, headers=auth_headers)
-    bot = response.json()["bot_info"]
+    bot = response.json()
 
     yield bot
 
-    client.delete(f"{API_PREFIX}/bots/{bot["bot_id"]}", headers=auth_headers)
+    client.delete(f"{API_PREFIX}/bots/{bot["bot_info"]["bot_id"]}", headers=auth_headers)
 
 
 @pytest.fixture
@@ -350,7 +350,7 @@ def created_document(client, auth_headers, created_bot, sample_txt_file):
     }
 
     response = client.post(
-        f"{API_PREFIX}/bots/{created_bot["bot_id"]}/documents",
+        f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}/documents",
         files=files,
         data=data,
         headers=auth_headers
@@ -361,7 +361,7 @@ def created_document(client, auth_headers, created_bot, sample_txt_file):
 
     try:
         client.delete(
-            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/documents/{document['doc_id']}",
+            f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}/documents/{document['doc_id']}",
             headers=auth_headers
         )
     except Exception:

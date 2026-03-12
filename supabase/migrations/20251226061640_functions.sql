@@ -91,3 +91,13 @@ BEGIN
   RETURN vault.create_secret(secret);
 END;
 $$;
+
+CREATE OR REPLACE FUNCTION public.get_secret(secret_id UUID)
+RETURNS TEXT
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  RETURN (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE id = secret_id);
+END;
+$$;

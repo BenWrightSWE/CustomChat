@@ -61,7 +61,7 @@ class TestGetAllBots:
 class TestGetBotById:
     def test_get_bot_by_id_returns_200_and_bot(self, client, auth_headers, created_bot):
         response = client.get(
-            f"{API_PREFIX}/bots/{created_bot["bot_id"]}",
+            f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}",
             headers=auth_headers
         )
 
@@ -85,7 +85,7 @@ class TestGetBotById:
 
     def test_get_bot_by_id_without_auth_returns_401(self, client, invalid_auth_headers, created_bot):
         response = client.get(
-            f"{API_PREFIX}/bots/{created_bot["bot_id"]}",
+            f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}",
             headers=invalid_auth_headers
         )
 
@@ -97,7 +97,7 @@ class TestUpdateBotByID:
         update_data = {"bot_name": "Updated Bot"}
 
         response = client.patch(
-            f"{API_PREFIX}/bots/{created_bot["bot_id"]}",
+            f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}",
             json=update_data,
             headers=auth_headers
         )
@@ -124,7 +124,7 @@ class TestUpdateBotByID:
         }
 
         response = client.patch(
-            f"{API_PREFIX}/bots/{created_bot["bot_id"]}",
+            f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}",
             json=update_data,
             headers=auth_headers
         )
@@ -144,7 +144,7 @@ class TestUpdateBotByID:
         update_data = {}
 
         response = client.patch(
-            f"{API_PREFIX}/bots/{created_bot["bot_id"]}",
+            f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}",
             json=update_data,
             headers=auth_headers
         )
@@ -166,7 +166,7 @@ class TestUpdateBotByID:
         update_data = {"bot_name": "Updated Bot"}
 
         response = client.patch(
-            f"{API_PREFIX}/bots/{created_bot["bot_id"]}",
+            f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}",
             json=update_data,
             headers=invalid_auth_headers
         )

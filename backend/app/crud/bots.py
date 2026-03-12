@@ -1,8 +1,6 @@
 from app.schemas.bots import BotCreate, BotUpdate
 from app.core.supabase import supabase_admin
-import hashlib
-import base64
-import os
+from app.utils.vault import make_and_store_api_key
 
 
 def create_bot(user_id: str, bot_data: BotCreate):
@@ -67,23 +65,12 @@ def does_bot_exist(bot_id: int) -> bool:
     return True if response.data else False
 
 
-# used to generate API key and its hash for the bots
-def generate_api_key(length: int) -> tuple[str, str]:
-    raw_bytes = os.urandom(length)
-    raw_key = f"bot_response_{base64.urlsafe_b64encode(raw_bytes).decode().rstrip('=')}"
-    hashed_key = hashlib.sha256(raw_key.encode()).hexdigest()
-    return raw_key, hashed_key
-
-
-# returns the API key to present to the user and the UUID of the secret in the vault
-def make_and_store_api_key() -> tuple[str, str]:
-    api_key_and_hash = generate_api_key(32)
-    response = supabase_admin.rpc(
-        "insert_secret",
-        {
-            "secret": api_key_and_hash[1],
-        }
-    ).execute()
-    vault_uuid = response.data
-
-    return api_key_and_hash[0], vault_uuid
+# used for checking the bots API key against passed API key
+def get_vault_uuid(bot_id: int) -> str:
+    response = (
+        supabase_admin.table("bots")
+        .select("vault_uuid")
+        .eq("bot_id", bot_id)
+        .execute()
+    )
+    return response.data[0]["vault_uuid"]
