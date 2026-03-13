@@ -174,6 +174,33 @@ class TestUpdateBotByID:
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
+class TestUpdateBotAPIKey:
+    def test_update_bot_api_key_returns_200_and_key(self, client, auth_headers, created_bot):
+        response = client.patch(
+            f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}/api_key",
+            headers=auth_headers
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        assert isinstance(response.json()["bot_api_key"], str)
+
+    def test_update_bot_api_key_for_nonexistent_bot_returns_404(self, client, auth_headers):
+        response = client.patch(
+            f"{API_PREFIX}/bots/{NONEXISTENT_BOT_ID}/api_key",
+            headers=auth_headers
+        )
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_update_bot_api_key_without_auth_returns_401(self, client, invalid_auth_headers, created_bot):
+        response = client.patch(
+            f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}/api_key",
+            headers=invalid_auth_headers
+        )
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
 class TestDeleteBotByID:
     def test_delete_bot_by_id_returns_204(self, client, auth_headers, sample_bot_data):
         set_up_response = client.post(f"{API_PREFIX}/bots", json=sample_bot_data, headers=auth_headers)

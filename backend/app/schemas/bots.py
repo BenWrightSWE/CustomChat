@@ -33,3 +33,8 @@ class BotResponse(BotBase):
 class BotCreateResponse(BaseModel):
     bot_info: BotResponse
     bot_api_key: str
+
+
+class BotUpdateKeyResponse(BaseModel):
+    bot_id: int
+    bot_api_key: str

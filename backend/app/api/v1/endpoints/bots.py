@@ -1,14 +1,20 @@
 from fastapi import APIRouter, HTTPException, Depends, status
-from app.schemas.bots import BotCreate, BotCreateResponse, BotUpdate, BotResponse
+from app.schemas.bots import (
+    BotCreate,
+    BotCreateResponse,
+    BotUpdate,
+    BotResponse,
+    BotUpdateKeyResponse
+)
 from app.crud import bots as crud
 from app.core.security import get_current_user, verify_bot_ownership
+from app.utils.vault import make_and_update_api_key
 
 router = APIRouter()
 
 
 @router.post("/", response_model=BotCreateResponse, status_code=status.HTTP_201_CREATED)
 def create_bot(bot_data: BotCreate, current_user: dict = Depends(get_current_user)):
-    # Need to add a checker for the bot data
     try:
         response = crud.create_bot(current_user["id"], bot_data)
         return {
@@ -66,6 +72,22 @@ def update_bot_by_id(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
 
 
+@router.patch("/{bot_id}/api_key", response_model=BotUpdateKeyResponse)
+def update_bot_api_key(
+    bot_id: int,
+    _: dict = Depends(verify_bot_ownership),
+):
+    try:
+        vault_uuid = crud.get_vault_uuid(bot_id)
+        return {
+            "bot_id": bot_id,
+            "bot_api_key": make_and_update_api_key(vault_uuid)
+        }
+    except Exception as e:
+        print(f"Error updating bot API key: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error while deleting bot by id")
+
+
 @router.delete("/{bot_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_bot_by_id(
     bot_id: int,
@@ -76,5 +98,5 @@ def delete_bot_by_id(
         crud.delete_bot_by_id(current_user["id"], bot_id)
         return None
     except Exception as e:
-        print(f"Error updating bot: {e}")
+        print(f"Error deleting bot: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error while deleting bot by id")

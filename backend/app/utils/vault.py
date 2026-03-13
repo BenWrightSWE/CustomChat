@@ -27,6 +27,18 @@ def make_and_store_api_key() -> tuple[str, str]:
     return api_key_and_hash[0], vault_uuid
 
 
+def make_and_update_api_key(vault_uuid: str) -> str:
+    api_key_and_hash = generate_api_key(32)
+    response = supabase_admin.rpc(
+        "update_secret",
+        {
+            "secret_id": vault_uuid,
+            "secret": api_key_and_hash[1],
+        }
+    ).execute()
+    return api_key_and_hash[0]
+
+
 def get_secret(vault_uuid: str) -> str:
     response = supabase_admin.rpc(
         "get_secret",

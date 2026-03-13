@@ -87,8 +87,25 @@ RETURNS UUID
 LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
+DECLARE
+  new_uuid UUID;
 BEGIN
-  RETURN vault.create_secret(secret);
+  SELECT vault.create_secret(secret) INTO new_uuid;
+  RETURN new_uuid;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.update_secret(secret_id UUID, secret TEXT)
+RETURNS VOID
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  PERFORM vault.update_secret(
+    secret_id := secret_id,
+    new_secret := secret
+  );
+  RETURN;
 END;
 $$;
 
