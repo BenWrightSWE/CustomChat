@@ -19,7 +19,6 @@ from app.utils.assistant import (
 from app.utils.documents import get_document_embed_data_from_api
 from supabase import create_client
 
-
 from io import BytesIO
 import os
 
@@ -39,6 +38,8 @@ TEST_USER_PASSWORD = "test_password_123"
 @asynccontextmanager
 async def test_lifespan(app):
     yield
+
+
 
 
 @pytest.fixture
@@ -345,8 +346,6 @@ def created_document(client, auth_headers, created_bot, sample_txt_file):
     files = {"file": ("fixture_test.txt", sample_txt_file, "text/plain")}
     data = {
         "doc_name": "fixture_test",
-        "doc_type": ".txt",
-        "doc_size": 50
     }
 
     response = client.post(

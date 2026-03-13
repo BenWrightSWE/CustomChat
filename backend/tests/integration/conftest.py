@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 from pathlib import Path
+import uuid
 
 
 env_path = Path(__file__).resolve().parents[1] / ".env"
@@ -16,12 +17,8 @@ import os
 
 API_PREFIX = "/api/v1"
 
-NONEXISTENT_BOT_ID = 99999
-NONEXISTENT_DOC_ID = 99999
-NONEXISTENT_FB_ID = 99999
 TEST_TXT_SIZE = 72
 
-TEST_USER_EMAIL = "test@example.com"
 TEST_USER_PASSWORD = "test_password_123"
 
 
@@ -37,44 +34,41 @@ def client():
     return TestClient(app)
 
 
-
 # Authentication Fixtures
 
 
-@pytest.fixture(scope="session", autouse=True)
-def ensure_test_user_exists():
-    """
-    Ensure test user exists before running any tests.
-    """
+@pytest.fixture
+def create_test_user():
     url = os.getenv("SUPABASE_URL")
     service_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 
-    if not service_key:
-        pytest.skip("SUPABASE_SERVICE_ROLE_KEY not set - cannot create test user")
-
     supabase = create_client(url, service_key)
 
-    try:
-        supabase.auth.admin.create_user({
-            "email": TEST_USER_EMAIL,
-            "password": TEST_USER_PASSWORD,
-            "email_confirm": True,
-            "user_metadata": {
-                "first_name": "John",
-                "last_name": "Doe",
-                "company":  "DoubleOSeven",
-                "phone": "1234567890"
-            }
-        })
-        print(f"Created test user: {TEST_USER_EMAIL}")
-    except Exception as e:
-        if "already" in str(e).lower():
-            print(f"Test user already exists: {TEST_USER_EMAIL}")
-        else:
-            print(f"Could not create test user: {e}")
+    email = f"test_{uuid.uuid4()}@example.com"
+    password = "testpassword123"
+
+    response = supabase.auth.admin.create_user({
+        "email": email,
+        "password": password,
+        "email_confirm": True,
+        "user_metadata": {
+            "first_name": "John",
+            "last_name": "Doe"
+        }
+    })
+
+    user_id = response.user.id
+
+    yield {
+        "email": email,
+        "password": password,
+        "user_id": user_id
+    }
+
+    supabase.auth.admin.delete_user(user_id)
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def supabase_test_client():
     """Create Supabase client for tests."""
     url = os.getenv("SUPABASE_URL")
@@ -82,54 +76,45 @@ def supabase_test_client():
     return create_client(url, key)
 
 
-@pytest.fixture(scope="session")
-def auth_token(supabase_test_client):
-    """
-    Get auth token for test user.
+@pytest.fixture
+def auth_token(create_test_user, supabase_test_client):
 
-    Signs in as the test user and returns the JWT token.
-    """
-    try:
-        response = supabase_test_client.auth.sign_in_with_password({
-            "email": TEST_USER_EMAIL,
-            "password": TEST_USER_PASSWORD
-        })
-        return response.session.access_token
-    except Exception as e:
-        pytest.fail(
-            f"Failed to authenticate test user.\n"
-            f"Make sure test user exists: {TEST_USER_EMAIL}\n"
-            f"Error: {e}"
-        )
+    response = supabase_test_client.auth.sign_in_with_password({
+        "email": create_test_user["email"],
+        "password": create_test_user["password"]
+    })
+
+    return response.session.access_token
 
 
+# This is called by the test, creates the user, logs them in, gets the auth token, and provides the auth headers.
 @pytest.fixture
 def auth_headers(auth_token):
     """Provide authentication headers for test requests."""
     return {"Authorization": f"Bearer {auth_token}"}
 
 
-@pytest.fixture
-def invalid_auth_headers():
-    """
-    Provides invalid authentication headers for testing auth failures.
-
-    Usage:
-        def test_unauthorized(client, invalid_auth_headers):
-            response = client.get("/protected", headers=invalid_auth_headers)
-            assert response.status_code == status.HTTP_401_UNAUTHORIZED
-    """
-    return {"Authorization": "Bearer invalid_token"}
+# CREATION FIXTURES
 
 
 @pytest.fixture
-def test_user_id(supabase_test_client, auth_token):
-    """Get the test user's ID."""
-    user = supabase_test_client.auth.get_user(auth_token)
-    return user.user.id
+def sample_bot_data():
+    """
+    Provides sample bot data for creation.
+    """
+    return {
+        "bot_name": "Test Bot",
+        "bot_desc": "A bot for testing",
+        "avatar": "base",
+        "color": "tan",
+        "storage": 0,
+        "uses": 0
+    }
+
+
+
 
 # Sample File Fixtures
-
 
 @pytest.fixture
 def sample_txt_file():
@@ -150,19 +135,6 @@ def sample_txt_file():
 
 # do sample docx
 
-
-@pytest.fixture
-def large_file():
-    """
-    Provides a file that exceeds the size limit (>10MB).
-
-    Used for testing file size validation.
-    """
-    size = 11 * 1024 * 1024  # 11MB
-    content = b"x" * size
-    return BytesIO(content)
-
-
 @pytest.fixture
 def invalid_file_exe():
     """
@@ -176,52 +148,6 @@ def invalid_file_exe():
 
 
 # Test Data Fixtures
-
-
-@pytest.fixture
-def sample_document_data():
-    """
-    Provide sample document metadata for creation.
-
-    Usage:
-        def test_create(client, auth_headers, sample_txt_file, sample_document_data):
-            files = {"file": ("test.txt", sample_txt_file, "text/plain")}
-            response = client.post("/documents", files=files, data=sample_document_data)
-    """
-    return {
-        "doc_name": "test_document",
-        "doc_type": ".txt",
-        "doc_size": 9
-    }
-
-
-@pytest.fixture
-def sample_bot_data():
-    """
-    Provides sample bot data for creation.
-    """
-    return {
-        "bot_name": "Test Bot",
-        "bot_desc": "A bot for testing",
-        "avatar": "base",
-        "color": "tan",
-        "storage": 0,
-        "uses": 0
-    }
-
-
-@pytest.fixture
-def sample_feedback_data():
-    """
-    Provides sample feedback data for creation.
-    """
-    return {
-        "fb_date": "2026-01-06",
-        "fb_time": "10:30:15",
-        "fb_desc": "Sample feedback data!",
-        "is_neg": True,
-        "use_log": None
-    }
 
 
 @pytest.fixture
@@ -245,7 +171,6 @@ def sample_assistant_request():
 
 
 # Database/Resource Fixtures (with cleanup)
-
 
 @pytest.fixture
 def created_bot(client, auth_headers, sample_bot_data):
