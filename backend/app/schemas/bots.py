@@ -28,3 +28,13 @@ class BotResponse(BotBase):
 
     class Config:
         from_attributes = True  # Allows Pydantic to read data from database models
+
+
+class BotCreateResponse(BaseModel):
+    bot_info: BotResponse
+    bot_api_key: str
+
+
+class BotUpdateKeyResponse(BaseModel):
+    bot_id: int
+    bot_api_key: str

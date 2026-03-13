@@ -10,7 +10,7 @@ from fastapi import status
 class TestCreateFeedback:
     def test_create_feedback_returns_201(self, client, auth_headers, created_bot, sample_feedback_data):
         response = client.post(
-            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/feedback",
+            f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}/feedback",
             json=sample_feedback_data,
             headers=auth_headers
         )
@@ -30,7 +30,7 @@ class TestCreateFeedback:
             self, client, invalid_auth_headers, created_bot, sample_feedback_data
     ):
         response = client.post(
-            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/feedback",
+            f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}/feedback",
             json=sample_feedback_data,
             headers=invalid_auth_headers
         )
@@ -41,7 +41,7 @@ class TestCreateFeedback:
 class TestGetAllFeedback:
     def test_get_all_feedback_returns_200_and_list(self, client, auth_headers, created_bot):
         response = client.get(
-            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/feedback",
+            f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}/feedback",
             headers=auth_headers
         )
 
@@ -58,7 +58,7 @@ class TestGetAllFeedback:
 
     def test_get_all_feedback_without_auth_returns_401(self, client, invalid_auth_headers, created_bot):
         response = client.get(
-            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/feedback",
+            f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}/feedback",
             headers=invalid_auth_headers
         )
 
@@ -68,14 +68,14 @@ class TestGetAllFeedback:
 class TestGetFeedbackById:
     def test_get_feedback_by_id_returns_200_and_object(self, client, auth_headers, created_bot, sample_feedback_data):
         set_up_response = client.post(
-            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/feedback",
+            f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}/feedback",
             json=sample_feedback_data,
             headers=auth_headers
         )
         feedback = set_up_response.json()
 
         response = client.get(
-            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/feedback/{feedback["fb_id"]}",
+            f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}/feedback/{feedback["fb_id"]}",
             headers=auth_headers
         )
 
@@ -89,7 +89,7 @@ class TestGetFeedbackById:
 
     def test_get_feedback_by_id_for_nonexistent_feedback_returns_404(self, client, auth_headers, created_bot):
         response = client.get(
-            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/feedback{NONEXISTENT_FB_ID}",
+            f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}/feedback{NONEXISTENT_FB_ID}",
             headers=auth_headers
         )
 
@@ -107,14 +107,14 @@ class TestGetFeedbackById:
             self, client, auth_headers, invalid_auth_headers, created_bot, sample_feedback_data
     ):
         set_up_response = client.post(
-            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/feedback",
+            f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}/feedback",
             json=sample_feedback_data,
             headers=auth_headers
         )
         feedback = set_up_response.json()
 
         response = client.get(
-            f"{API_PREFIX}/bots/{created_bot["bot_id"]}/feedback/{feedback["fb_id"]}",
+            f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}/feedback/{feedback["fb_id"]}",
             headers=invalid_auth_headers
         )
 
