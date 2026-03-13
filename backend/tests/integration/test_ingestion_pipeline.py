@@ -1,5 +1,9 @@
-from tests.unit.conftest import API_PREFIX, TEST_TXT_SIZE
+from tests.unit.conftest import API_PREFIX
+from app.crud.vectors import get_all_vector_embeddings_by_doc_id
+from app.core.supabase import supabase_admin
 from fastapi import status
+
+
 class TestIngestionPipeline:
     def test_ingestion_pipeline_txt(
             self, client, auth_headers, sample_bot_data, sample_txt_file
@@ -12,12 +16,11 @@ class TestIngestionPipeline:
 
         assert create_bot_response.status_code == status.HTTP_201_CREATED
         bot = create_bot_response.json()
+        assert supabase_admin.table("bots").select("*").eq("bot_id", bot["bot_info"]["bot_id"]).execute()
 
         files = {"file": ("test.txt", sample_txt_file, "text/plain")}
         data = {
-            "doc_name": "test",
-            "doc_type": ".txt",
-            "doc_size": TEST_TXT_SIZE
+            "doc_name": "test"
         }
 
         create_doc_response = client.post(
@@ -26,3 +29,23 @@ class TestIngestionPipeline:
             data=data,
             headers=auth_headers
         )
+
+        assert create_doc_response.status_code == status.HTTP_201_CREATED
+        doc = create_doc_response.json()
+        db_doc = supabase_admin.table("documents").select("*").eq("bot_id", doc["bot_id"]).eq("doc_id", doc["doc_id"]).execute().data
+        assert len(db_doc) == 1
+        doc_list = supabase_admin.storage.from_("documents").list(f"documents/{doc['bot_id']}/")
+        assert len(doc_list) > 0
+        file_names = [f["name"] for f in doc_list]
+        assert doc["file_name"] in file_names
+
+        vectors_response = get_all_vector_embeddings_by_doc_id(
+            doc["bot_id"],
+            doc["doc_id"]
+        )
+
+        assert len(vectors_response) > 0
+
+        for vector_embedding in vectors_response:
+            assert vector_embedding["bot_id"] == doc["bot_id"]
+            assert vector_embedding["doc_id"] == doc["doc_id"]

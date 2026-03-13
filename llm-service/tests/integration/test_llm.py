@@ -1,4 +1,4 @@
-from tests import API_PREFIX
+from tests.integration.conftest import API_PREFIX
 from fastapi import status
 import pytest
 

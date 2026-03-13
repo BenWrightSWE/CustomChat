@@ -9,6 +9,7 @@ from app.utils.storage import (
     upload_file_to_storage,
     download_file_from_storage,
     delete_file_from_storage,
+    get_document_storage_path
 )
 from app.utils.documents import (
     get_document_and_storage_path_by_id,
@@ -65,7 +66,7 @@ async def create_document(
             raise HTTPException(status_code=409, detail="Document already exists")
 
         else:
-            storage_path = f"documents/{bot_id}/{file.filename}"
+            storage_path = get_document_storage_path(bot_id, file.filename)
 
             upload_file_to_storage(
                 storage_path, file_content, file.content_type, upsert="true"
