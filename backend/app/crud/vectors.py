@@ -16,24 +16,12 @@ def create_vectors(bot_id: int, doc_id: int, vector_data: List[VectorCreate]):
 
 
 def get_vector_neighbors(bot_id: int, vector_embedding: SearchableVector):
-    neighbor_query = """
-        SELECT vec_id, context <-> $1 AS distance
-        FROM vectors
-        WHERE bot_id = $2
-        ORDER BY distance
-        LIMIT $3
-    """
-
-    # have to use rpc because the python client for supabase doesn't have the pgvector distance operators.
     result = supabase_admin.rpc(
-        "exec_sql",
+        "get_vector_neighbors",
         {
-            "query": neighbor_query,
-            "params": [
-                vector_embedding["embedding"],
-                bot_id,
-                NEIGHBOR_LIMIT
-            ]
+            "query_embedding": vector_embedding.embedding,
+            "bot_id_input": bot_id,
+            "neighbor_limit": NEIGHBOR_LIMIT
         }
     ).execute()
 

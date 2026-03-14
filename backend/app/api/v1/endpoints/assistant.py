@@ -34,12 +34,12 @@ def bot_contextual_response(bot_id: int, request_data: AssistantRequest):
             embedding=get_api_embedding(passed_values["user_input"])
         )
 
-        neighbor_results = get_vector_neighbors(bot_id, user_input_vector)["neighbors"]
+        neighbor_results = get_vector_neighbors(bot_id, user_input_vector).neighbors
 
         context_strings = []
 
         for result in neighbor_results:
-            context_strings.append(result["context"])
+            context_strings.append(result.context)
 
         return AssistantResponse(
             role="ASSISTANT",

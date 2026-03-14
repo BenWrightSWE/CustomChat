@@ -56,12 +56,14 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+
 -- Drop and then Create the trigger to ensure idempotency (no "already exists" error)
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_new_user();
+
 
 -- Trigger to sync email changes from auth.users to users table
 CREATE OR REPLACE FUNCTION sync_user_email()
@@ -74,6 +76,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
+
 CREATE TRIGGER on_auth_user_email_updated
   AFTER UPDATE OF email ON auth.users
   FOR EACH ROW
@@ -81,6 +84,7 @@ CREATE TRIGGER on_auth_user_email_updated
   EXECUTE FUNCTION sync_user_email();
 
 -- How to update email with the trigger: supabase_admin.auth.admin.update_user_by_id(user_id, {"email": new_email})
+
 
 CREATE OR REPLACE FUNCTION public.insert_secret(secret TEXT)
 RETURNS UUID
@@ -94,6 +98,7 @@ BEGIN
   RETURN new_uuid;
 END;
 $$;
+
 
 CREATE OR REPLACE FUNCTION public.update_secret(secret_id UUID, secret TEXT)
 RETURNS VOID
@@ -109,6 +114,7 @@ BEGIN
 END;
 $$;
 
+
 CREATE OR REPLACE FUNCTION public.get_secret(secret_id UUID)
 RETURNS TEXT
 LANGUAGE plpgsql
@@ -117,4 +123,27 @@ AS $$
 BEGIN
   RETURN (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE id = secret_id);
 END;
+$$;
+
+
+CREATE OR REPLACE FUNCTION get_vector_neighbors(
+    query_embedding vector,
+    bot_id_input integer,
+    neighbor_limit integer
+)
+RETURNS TABLE (
+    vec_id bigint,
+    context text,
+    distance float
+)
+LANGUAGE sql
+AS $$
+    SELECT
+        vec_id,
+        context,
+        embedding <-> query_embedding AS distance
+    FROM vectors
+    WHERE bot_id = bot_id_input
+    ORDER BY embedding <-> query_embedding
+    LIMIT neighbor_limit;
 $$;
