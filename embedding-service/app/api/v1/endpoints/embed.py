@@ -6,7 +6,8 @@ from app.schemas.embed import (
     TxtDocumentRequest,
     DocumentEmbedResponse,
     UserInputEmbedResponse,
-    EmbedObject
+    EmbedObject,
+    StringRequest
 )
 
 router = APIRouter()
@@ -51,9 +52,32 @@ def embed_txt_document(request: TxtDocumentRequest):
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error while embedding document"
+            detail=f"Internal server error while embedding document"
         )
+
 
 # implement for pdf
 
+
 # implement for docx
+
+
+# single chunk embedding
+@router.post("/str", response_model=EmbedObject)
+def embed_string(request: StringRequest):
+    try:
+        if len(request.string) > settings.MAX_STRING_SIZE_CHAR:
+            raise HTTPException(
+                status_code=status.HTTP_413_CONTENT_TOO_LARGE,
+                detail=f"String exceeds {settings.MAX_STRING_SIZE_CHAR} char limit"
+            )
+        embed_result = main.embed_client.embed_text(request.string)
+        return EmbedObject(chunk=request.string, embedding=embed_result[0])
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error while embedding string"
+        )

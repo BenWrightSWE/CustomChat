@@ -1,14 +1,13 @@
 from pydantic_settings import BaseSettings
 
 
-class Settings(BaseSettings):
-    LLM_API_KEY: str
+from pydantic_settings import BaseSettings
 
+class Settings(BaseSettings):
+    LLM_API_KEY: str = ""
     API_KEY_NAME: str = "X-API-KEY"
 
-    @property
-    class ConfigDict:
-        env_file = ".env"
-
+    class Config:
+        env_file = ".env"  # <-- no @property
 
 settings = Settings()

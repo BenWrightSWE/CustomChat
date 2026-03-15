@@ -37,18 +37,12 @@ def get_document_by_filename(bot_id: int, file_name: str):
     Returns a document based on the file name.
     file_name is the full name including extension (eg, name.txt)
     """
-    if "." not in file_name:
-        raise ValueError("File must have an extension")
-
-    doc_name = ".".join(file_name.split(".")[:-1])
-    doc_type = "." + file_name.split(".")[-1]
 
     response = (
         supabase_admin.table("documents")
         .select("*")
         .eq("bot_id", bot_id)
-        .eq("doc_name", doc_name)
-        .eq("doc_type", doc_type)
+        .eq("file_name", file_name)
         .maybe_single()
         .execute()
     )

@@ -12,13 +12,13 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1.router import api_router
 from app.crud.vectors import get_vector_neighbors
+from app.schemas.vectors import VectorSearchResponse, VectorSearchItem
 from app.utils.assistant import (
     get_api_embedding,
     get_llm_api_response
 )
 from app.utils.documents import get_document_embed_data_from_api
 from supabase import create_client
-
 
 from io import BytesIO
 import os
@@ -39,6 +39,8 @@ TEST_USER_PASSWORD = "test_password_123"
 @asynccontextmanager
 async def test_lifespan(app):
     yield
+
+
 
 
 @pytest.fixture
@@ -82,15 +84,15 @@ def client(app, mocker):
     )
     mocker.patch(
         "app.api.v1.endpoints.assistant.get_vector_neighbors",
-        return_value={
-            "neighbors": [
-                {"context": "Context number one."},
-                {"context": "Context number two."},
-                {"context": "Context number three."},
-                {"context": "Context number four."},
-                {"context": "Context number five."},
-            ]
-        }
+        return_value=VectorSearchResponse(
+                neighbors=[
+                    VectorSearchItem(vec_id=1, context="Context number one."),
+                    VectorSearchItem(vec_id=2, context="Context number two."),
+                    VectorSearchItem(vec_id=3, context="Context number three."),
+                    VectorSearchItem(vec_id=4, context="Context number four."),
+                    VectorSearchItem(vec_id=5, context="Context number five.")
+                ]
+        )
     )
     mocker.patch(
         "app.api.v1.endpoints.documents.get_document_embed_data_from_api",
@@ -258,8 +260,6 @@ def sample_document_data():
     """
     return {
         "doc_name": "test_document",
-        "doc_type": ".txt",
-        "doc_size": 9
     }
 
 
@@ -345,8 +345,6 @@ def created_document(client, auth_headers, created_bot, sample_txt_file):
     files = {"file": ("fixture_test.txt", sample_txt_file, "text/plain")}
     data = {
         "doc_name": "fixture_test",
-        "doc_type": ".txt",
-        "doc_size": 50
     }
 
     response = client.post(

@@ -5,6 +5,7 @@ class Settings(BaseSettings):
 
     API_KEY_NAME: str = "X-API-KEY"
     MAX_DOCUMENT_SIZE_MB: int = 10
+    MAX_STRING_SIZE_CHAR: int = 2000
 
     @property
     def MAX_DOCUMENT_SIZE(self) -> int:

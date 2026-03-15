@@ -16,20 +16,25 @@ def create_vectors(bot_id: int, doc_id: int, vector_data: List[VectorCreate]):
 
 
 def get_vector_neighbors(bot_id: int, vector_embedding: SearchableVector):
-    neighbor_query = """
-        WITH relaxed_results AS MATERIALIZED (
-            SELECT vec_id, context <-> %s 
-            AS distance 
-            FROM vectors 
-            WHERE bot_id = %s
-            ORDER BY distance LIMIT %s
-        ) 
-        SELECT * FROM relaxed_results ORDER BY distance + 0;
-    """
+    result = supabase_admin.rpc(
+        "get_vector_neighbors",
+        {
+            "query_embedding": vector_embedding.embedding,
+            "bot_id_input": bot_id,
+            "neighbor_limit": NEIGHBOR_LIMIT
+        }
+    ).execute()
 
-    result = supabase_admin.rpc('exec_sql', {
-        "query": neighbor_query,
-        "params": [vector_embedding["embedding"], bot_id, NEIGHBOR_LIMIT]
-    }).execute()
+    neighbors = result.data or []
 
-    return VectorSearchResponse(neighbors=result.data)
+    return VectorSearchResponse(neighbors=neighbors)
+
+
+def get_all_vector_embeddings_by_doc_id(bot_id: int, doc_id: int):
+    result = supabase_admin.table("vectors") \
+        .select("*") \
+        .eq("bot_id", bot_id) \
+        .eq("doc_id", doc_id) \
+        .execute()
+
+    return result.data

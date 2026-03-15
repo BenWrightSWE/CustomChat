@@ -30,8 +30,9 @@ CREATE TABLE documents (
     doc_id BIGSERIAL PRIMARY KEY,
     bot_id BIGINT REFERENCES bots(bot_id) ON DELETE CASCADE,
     doc_name TEXT,
+    file_name TEXT,
     doc_type TEXT,
-    doc_size INT -- size of document in KB
+    doc_size INT -- size of document in bytes
 );
 
 -- Table storing the feedback for each bot.

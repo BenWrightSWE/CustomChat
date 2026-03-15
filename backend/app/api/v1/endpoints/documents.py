@@ -9,6 +9,7 @@ from app.utils.storage import (
     upload_file_to_storage,
     download_file_from_storage,
     delete_file_from_storage,
+    get_document_storage_path
 )
 from app.utils.documents import (
     get_document_and_storage_path_by_id,
@@ -37,13 +38,9 @@ MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
 async def create_document(
     bot_id: int,
     doc_name: str = Form(...),
-    doc_type: str = Form(...),
-    doc_size: int = Form(...),
     file: UploadFile = File(...),
     _: dict = Depends(verify_bot_ownership),
 ):
-
-    doc_data = DocumentCreate(doc_name=doc_name, doc_type=doc_type, doc_size=doc_size)
 
     try:
         # Validates content type
@@ -52,8 +49,16 @@ async def create_document(
 
         # Validates file size
         file_content = await file.read()
+
         if len(file_content) > MAX_FILE_SIZE:
             raise HTTPException(status_code=400, detail="File too large")
+
+        doc_data = DocumentCreate(
+            doc_name=doc_name,
+            file_name=file.filename,
+            doc_type=file.content_type,
+            doc_size=len(file_content)
+        )
 
         existing = crud.get_document_by_filename(bot_id, file.filename)
 
@@ -61,7 +66,7 @@ async def create_document(
             raise HTTPException(status_code=409, detail="Document already exists")
 
         else:
-            storage_path = f"documents/{bot_id}/{file.filename}"
+            storage_path = get_document_storage_path(bot_id, file.filename)
 
             upload_file_to_storage(
                 storage_path, file_content, file.content_type, upsert="true"
@@ -129,7 +134,8 @@ def download_document_by_id(
 
         doc_bytes = download_file_from_storage(storage_path)
 
-        temp = tempfile.NamedTemporaryFile(delete=False, suffix=db_doc["doc_type"])
+        suffix = os.path.splitext(db_doc["file_name"])[1]
+        temp = tempfile.NamedTemporaryFile(delete=False, suffix=suffix)
 
         temp.write(doc_bytes)
         temp.close()
@@ -140,7 +146,7 @@ def download_document_by_id(
         return FileResponse(
             temp.name,
             media_type=db_doc["doc_type"],
-            filename=f"{db_doc["doc_name"]}{db_doc["doc_type"]}",
+            filename=db_doc["file_name"],
         )
 
     except HTTPException:

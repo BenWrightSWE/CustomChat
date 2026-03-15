@@ -22,8 +22,7 @@ def get_document_and_storage_path_by_id(
     if not document:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
 
-    doc_name_type = f"{document['doc_name']}{document['doc_type']}"
-    storage_path = f"documents/{bot_id}/{doc_name_type}"
+    storage_path = f"documents/{bot_id}/{document['file_name']}"
     return document, storage_path
 
 
@@ -35,6 +34,15 @@ def get_document_embed_data_from_api(file_content: str):
         headers={"X-API-KEY": os.getenv("EMBEDDING_API_KEY")}
     )
 
-    print(response.json())
+    try:
+        data = response.json()
+    except ValueError:
+        raise RuntimeError(f"Embedding API returned non-JSON: {response.text}")
 
-    return response.json()
+    if response.status_code != 200:
+        raise RuntimeError(f"Embedding API error {response.status_code}: {data}")
+
+    if "embedding_objects" not in data:
+        raise RuntimeError(f"'embedding_objects' missing in response: {data}")
+
+    return data

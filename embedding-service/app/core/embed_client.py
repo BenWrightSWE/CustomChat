@@ -17,6 +17,12 @@ class EmbedClient:
         ]
         return self.model.encode(formatted_texts)
 
+    def embed_text(self, text):
+        formatted_text = [
+            "search_document: " + text
+        ]
+        return self.model.encode(formatted_text)
+
     def embed_input(self, text):
         return self.model.encode("search_query: " + text)
 

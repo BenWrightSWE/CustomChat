@@ -14,8 +14,6 @@ class TestCreateDocument:
         files = {"file": ("test.txt", sample_txt_file, "text/plain")}
         data = {
             "doc_name": "test",
-            "doc_type": ".txt",
-            "doc_size": TEST_TXT_SIZE
         }
 
         response = client.post(
@@ -28,7 +26,7 @@ class TestCreateDocument:
         assert response.status_code == status.HTTP_201_CREATED
         json_data = response.json()
         assert json_data["doc_name"] == "test"
-        assert json_data["doc_type"] == ".txt"
+        assert json_data["doc_type"] == "text/plain"
         assert "doc_id" in json_data
 
         client.delete(
@@ -42,8 +40,6 @@ class TestCreateDocument:
         files = {"file": ("malware.exe", invalid_file_exe, "application/x-msdownload")}
         data = {
             "doc_name": "malware",
-            "doc_type": ".exe",
-            "doc_size": 5
         }
 
         response = client.post(
@@ -60,9 +56,7 @@ class TestCreateDocument:
         file_size = 11 * 1024 * 1024  # 11MB
         files = {"file": ("huge.txt", large_file, "text/plain")}
         data = {
-            "doc_name": "huge",
-            "doc_type": ".txt",
-            "doc_size": file_size
+            "doc_name": "huge"
         }
 
         response = client.post(
@@ -78,9 +72,7 @@ class TestCreateDocument:
     def test_create_doc_duplicate_returns_409(self, client, auth_headers, created_bot, sample_txt_file):
         files = {"file": ("duplicate.txt", sample_txt_file, "text/plain")}
         data = {
-            "doc_name": "duplicate",
-            "doc_type": ".txt",
-            "doc_size": TEST_TXT_SIZE
+            "doc_name": "duplicate"
         }
 
         first_response = client.post(
@@ -109,8 +101,6 @@ class TestCreateDocument:
         files = {"file": ("test.txt", sample_txt_file, "text/plain")}
         data = {
             "doc_name": "test",
-            "doc_type": ".txt",
-            "doc_size": TEST_TXT_SIZE
         }
 
         response = client.post(
@@ -126,8 +116,6 @@ class TestCreateDocument:
         files = {"file": ("test.txt", sample_txt_file, "text/plain")}
         data = {
             "doc_name": "test",
-            "doc_type": ".txt",
-            "doc_size": TEST_TXT_SIZE
         }
 
         response = client.post(
@@ -274,8 +262,6 @@ class TestDeleteDocumentById:
         files = {"file": ("delete_me.txt", sample_txt_file, "text/plain")}
         data = {
             "doc_name": "delete_me",
-            "doc_type": ".txt",
-            "doc_size": TEST_TXT_SIZE
         }
         create_response = client.post(
             f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}/documents",

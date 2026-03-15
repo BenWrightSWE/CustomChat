@@ -3,6 +3,7 @@ from pydantic import BaseModel
 
 class DocumentBase(BaseModel):
     doc_name: str
+    file_name: str
     doc_type: str
     doc_size: int
 
