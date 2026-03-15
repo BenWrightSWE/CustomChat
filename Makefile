@@ -66,9 +66,10 @@ dev:
 	make dev-backend & \
 	make dev-embedding & \
 	make dev-llm & \
-	make wait-for-services && \
+	make wait-for-services
+	sleep 5
 	make dev-frontend
-
+	@echo "Everything ready & frontend can be used!"
 
 stop:
 	supabase stop --no-backup
@@ -87,9 +88,7 @@ unit-test-llm-service:
 	source venv/bin/activate && \
 	pytest tests/unit
 
-int-test-llm-service: # need to check
-	make dev-llm & \
-	make wait-for-llm-service && \
+int-test-llm-service:
 	cd llm-service && \
 	source venv/bin/activate && \
 	pytest tests/integration -s
@@ -116,15 +115,23 @@ int-test-backend:
 	make stop
 
 all-tests:
+	cd embedding-service && \
+	source venv/bin/activate && \
+	pytest tests && \
+	cd .. && \
+	cd llm-service && \
+	source venv/bin/activate && \
+	pytest tests -s && \
+	cd ..
 	make dev-database & \
 	make dev-embedding & \
 	make dev-llm & \
 	make wait-for-database && \
 	make wait-for-embed-service && \
     make wait-for-llm-service && \
-	cd embedding-service && source venv/bin/activate && pytest tests && cd .. && \
-	cd llm-service && source venv/bin/activate && pytest tests && cd .. && \
-	cd backend && source venv/bin/activate && pytest tests && cd ..
+	cd backend && \
+	source venv/bin/activate && \
+	pytest tests -s
 	make stop
 
 # UTILITY COMMANDS
