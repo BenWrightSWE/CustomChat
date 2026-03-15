@@ -64,6 +64,16 @@ def sample_large_txt_file():
 
 
 @pytest.fixture
+def sample_string():
+    return "t" * 200
+
+
+@pytest.fixture
+def sample_large_string():
+    return "t" * 2001
+
+
+@pytest.fixture
 def test_api_key():
     """
         Returns the API key that allows use of the API.

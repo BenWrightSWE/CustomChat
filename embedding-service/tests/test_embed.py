@@ -58,3 +58,36 @@ class TestEmbedTxtDocument:
         )
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+class TestEmbedString:
+    def test_embed_str_returns_200_and_obj(self, client, test_api_key, sample_string):
+        response = client.post(
+            f"{API_PREFIX}/embed/str",
+            json={"string": sample_string},
+            headers=test_api_key
+        )
+
+        assert response.status_code == status.HTTP_200_OK
+        embedded_val = response.json()
+        assert isinstance(embedded_val["chunk"], str)
+        assert isinstance(embedded_val["embedding"], list)
+        assert len(embedded_val["embedding"]) > 0
+
+    def test_embed_str_size_exceeds_returns_413(self, client, test_api_key, sample_large_string):
+        response = client.post(
+            f"{API_PREFIX}/embed/str",
+            json={"string": sample_large_string},
+            headers=test_api_key
+        )
+
+        assert response.status_code == status.HTTP_413_CONTENT_TOO_LARGE
+
+    def test_embed_str_bad_api_key_returns_401(self, client, sample_string):
+        response = client.post(
+            f"{API_PREFIX}/embed/txt",
+            json={"string": sample_string},
+            headers={"X-API-KEY": ""}
+        )
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
