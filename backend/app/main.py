@@ -22,12 +22,12 @@ app.add_middleware(
 app.include_router(api_router, prefix="/api/v1")
 
 
-@app.get("/")
-async def ping():
-    return {"message": "pong"}
-
-
 @app.get("/health")
+def health():
+    return {"status": "ok"}
+
+
+@app.get("/health/user")
 def health_check():
     try:
         user = supabase.auth.get_user()

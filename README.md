@@ -31,33 +31,20 @@ At the moment, this app is in development. Thank you for understanding.
 
 ## <a name="#start-up">How To Start Up</a>
 
-make sure docker is open
-
-supabase start
-
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000 --workers 1
 
 ## <a name="#close-app">How to Close Down the App</a>
 
-ctrl + c on the uvicorn terminal
-
-supabase stop --no-backup
 
 ## <a name="#use-app">How To Use The App</a>
 
 
 ## <a name="#aware-of">Things To Be Aware Of</a>
 
-To test: just run (pytest) or (pytest tests/tests_blank.py)
-
 ## <a name="#further-work">Ideas for Further Work</a>
 
-* Add a pdf and docx reader 
-* Add a typescript widget to add to websites
 
 ## <a name="#other-dependencies">Other Dependencies</a>
 
-Make sure you have docker installed and running when you start up the app
 
 ## <a name="#contrib-acknow">Contributors & Acknowledgements</a>
 

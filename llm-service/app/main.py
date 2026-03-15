@@ -40,6 +40,6 @@ app.include_router(
 )
 
 
-@app.get("/")
-async def ping():
-    return {"message": "pong"}
+@app.get("/health")
+def health():
+    return {"status": "ok"}
