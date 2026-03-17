@@ -58,5 +58,3 @@ def bot_contextual_response(bot_id: int, request_data: AssistantRequest):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error while getting bot response"
         )
-
-    # think about adding bot_id to an API_key
