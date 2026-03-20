@@ -1,23 +1,20 @@
-from tests.conftest import API_PREFIX
+from tests.unit.conftest import API_PREFIX
+from fastapi import status
 
 
 class TestGetUserProfile:
 
     def test_get_user_profile_returns_200(self, client, auth_headers):
-        response = client.get(
-            f"{API_PREFIX}/me",
-            headers=auth_headers
-        )
+        response = client.get(f"{API_PREFIX}/me", headers=auth_headers)
 
-        assert response.status_code == 200
+        assert response.status_code == status.HTTP_200_OK
 
-    def test_get_user_profile_without_auth_returns_401(self, client, invalid_auth_headers):
-        response = client.get(
-            f"{API_PREFIX}/me",
-            headers=invalid_auth_headers
-        )
+    def test_get_user_profile_without_auth_returns_401(
+        self, client, invalid_auth_headers
+    ):
+        response = client.get(f"{API_PREFIX}/me", headers=invalid_auth_headers)
 
-        assert response.status_code == 401
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 class TestUpdateCurrentUser:
@@ -26,12 +23,10 @@ class TestUpdateCurrentUser:
         update_info = {"first_name": "Jane"}
 
         response = client.patch(
-            f"{API_PREFIX}/me",
-            json=update_info,
-            headers=auth_headers
+            f"{API_PREFIX}/me", json=update_info, headers=auth_headers
         )
 
-        assert response.status_code == 200
+        assert response.status_code == status.HTTP_200_OK
         json_data = response.json()
         assert json_data["first_name"] == "Jane"
         assert json_data["last_name"] == "Doe"
@@ -43,23 +38,21 @@ class TestUpdateCurrentUser:
         update_info = {}
 
         response = client.patch(
-            f"{API_PREFIX}/me",
-            json=update_info,
-            headers=auth_headers
+            f"{API_PREFIX}/me", json=update_info, headers=auth_headers
         )
 
-        assert response.status_code == 400
+        assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_update_current_user_without_auth_returns_401(self, client, invalid_auth_headers):
+    def test_update_current_user_without_auth_returns_401(
+        self, client, invalid_auth_headers
+    ):
         update_info = {"first_name": "Jane"}
 
         response = client.patch(
-            f"{API_PREFIX}/me",
-            json=update_info,
-            headers=invalid_auth_headers
+            f"{API_PREFIX}/me", json=update_info, headers=invalid_auth_headers
         )
 
-        assert response.status_code == 401
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
 class TestUpdateUserEmail:
@@ -67,25 +60,25 @@ class TestUpdateUserEmail:
         response = client.patch(
             f"{API_PREFIX}/me/email",
             json={"email": "updatetest@example.com"},
-            headers=auth_headers
+            headers=auth_headers,
         )
 
-        assert response.status_code == 200
+        assert response.status_code == status.HTTP_200_OK
         assert response.json()["message"] == "Email updated successfully"
 
         response = client.patch(
             f"{API_PREFIX}/me/email",
             json={"email": "test@example.com"},
-            headers=auth_headers
+            headers=auth_headers,
         )
 
-    def test_update_current_user_without_auth_returns_401(self, client, invalid_auth_headers):
+    def test_update_current_user_without_auth_returns_401(
+        self, client, invalid_auth_headers
+    ):
         update_info = {"first_name": "Jane"}
 
         response = client.patch(
-            f"{API_PREFIX}/me/email",
-            json=update_info,
-            headers=invalid_auth_headers
+            f"{API_PREFIX}/me/email", json=update_info, headers=invalid_auth_headers
         )
 
-        assert response.status_code == 401
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED

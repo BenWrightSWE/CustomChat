@@ -1,0 +1,50 @@
+from dotenv import load_dotenv
+from pathlib import Path
+
+env_path = Path(__file__).resolve().parents[1] / ".env"
+load_dotenv(dotenv_path=env_path)
+
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, Depends
+from fastapi.middleware.cors import CORSMiddleware
+from app.api.v1.router import api_router
+from app.core.chunk_client import get_chunker
+from app.core.embed_client import get_embedder
+from app.api.deps import get_api_key
+
+chunk_client = None
+embed_client = None
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global chunk_client, embed_client
+
+    print("Loading models...")
+    chunk_client = get_chunker()
+    embed_client = get_embedder()
+    print("Models loaded")
+
+    yield
+
+    print("Shutting down Embed API")
+
+
+app = FastAPI(title="Embed API", version="1.0.0", lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(
+    api_router, prefix="/api/v1", tags=["Embed"], dependencies=[Depends(get_api_key)]
+)
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}

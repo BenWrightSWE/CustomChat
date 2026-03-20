@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, status
 from app.schemas.users import UserUpdate, UserResponse, EmailUpdate
 from app.crud import users as crud
 from app.core.security import get_current_user
@@ -15,7 +15,10 @@ def get_user_profile(current_user: dict = Depends(get_current_user)):
         return user
     except Exception as e:
         print(f"Error fetching user: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error while getting user profile")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error while getting user profile",
+        )
 
 
 @router.patch("/", response_model=UserResponse)
@@ -28,6 +31,7 @@ def update_current_user(
         if not user_update.model_dump(exclude_unset=True):
             raise HTTPException(status_code=400, detail="No update data provided")
 
+        # updates user info in the database & returns the updated values
         crud.update_user_by_user_id(user_id, user_update)
         user = crud.get_user_by_user_id(user_id)
         return user
@@ -35,20 +39,24 @@ def update_current_user(
         raise
     except Exception as e:
         print(f"Error updating user: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error while updating user profile")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error while updating user profile",
+        )
 
 
 @router.patch("/email")
 def update_user_email(
-    email_data: EmailUpdate,
-    current_user: dict = Depends(get_current_user)
+    email_data: EmailUpdate, current_user: dict = Depends(get_current_user)
 ):
     try:
         supabase_admin.auth.admin.update_user_by_id(
-            current_user["id"],
-            {"email": str(email_data.email)}
+            current_user["id"], {"email": str(email_data.email)}
         )
         return {"message": "Email updated successfully"}
     except Exception as e:
         print(f"Error updating user: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error while updating user email")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error while updating user email",
+        )

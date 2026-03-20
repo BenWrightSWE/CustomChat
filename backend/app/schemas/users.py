@@ -9,14 +9,14 @@ class UserBase(BaseModel):
     email: str
     phone: str | None
 
-    @field_validator('phone')
+    @field_validator("phone")
     @classmethod
     def validate_phone(cls, value):
         if value is not None:
             if not value.isdigit():
-                raise ValueError('Phone must contain only digits')
+                raise ValueError("Phone must contain only digits")
             if len(value) != 10:
-                raise ValueError('Phone must be exactly 10 digits')
+                raise ValueError("Phone must be exactly 10 digits")
         return value
 
 
