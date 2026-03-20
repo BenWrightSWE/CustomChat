@@ -26,7 +26,7 @@ def make_and_store_api_key() -> tuple[str, str]:
         "insert_secret",
         {
             "secret": api_key_and_hash[1],
-        }
+        },
     ).execute()
     vault_uuid = response.data
 
@@ -44,7 +44,7 @@ def make_and_update_api_key(vault_uuid: str) -> str:
         {
             "secret_id": vault_uuid,
             "secret": api_key_and_hash[1],
-        }
+        },
     ).execute()
     return api_key_and_hash[0]
 
@@ -55,7 +55,7 @@ def get_secret(vault_uuid: str) -> str:
         "get_secret",
         {
             "secret_id": vault_uuid,
-        }
+        },
     ).execute()
     return response.data
 

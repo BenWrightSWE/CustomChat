@@ -10,7 +10,7 @@ def get_api_embedding(user_input: str) -> list:
     response = requests.post(
         f"{EMBEDDING_API_URL}/embed/user_input",
         json={"user_input": user_input},
-        headers={"X-API-KEY": os.getenv("EMBEDDING_API_KEY")}
+        headers={"X-API-KEY": os.getenv("EMBEDDING_API_KEY")},
     )
     response.raise_for_status()
     return response.json()["embedding"]
@@ -22,9 +22,9 @@ def get_llm_api_response(chat_history, context_strings: list, user_input: str) -
         json={
             "chat_history": chat_history,
             "input_context": context_strings,
-            "user_input": user_input
+            "user_input": user_input,
         },
-        headers={"X-API-KEY": os.getenv("LLM_API_KEY")}
+        headers={"X-API-KEY": os.getenv("LLM_API_KEY")},
     )
     response.raise_for_status()
     return response.json()["response"]

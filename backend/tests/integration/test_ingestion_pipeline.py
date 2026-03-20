@@ -6,42 +6,51 @@ from fastapi import status
 
 class TestIngestionPipeline:
     def test_ingestion_pipeline_txt(
-            self, client, auth_headers, sample_bot_data, sample_txt_file
+        self, client, auth_headers, sample_bot_data, sample_txt_file
     ):
         create_bot_response = client.post(
-            f"{API_PREFIX}/bots",
-            json=sample_bot_data,
-            headers=auth_headers
+            f"{API_PREFIX}/bots", json=sample_bot_data, headers=auth_headers
         )
 
         assert create_bot_response.status_code == status.HTTP_201_CREATED
         bot = create_bot_response.json()
-        assert supabase_admin.table("bots").select("*").eq("bot_id", bot["bot_info"]["bot_id"]).execute()
+        assert (
+            supabase_admin.table("bots")
+            .select("*")
+            .eq("bot_id", bot["bot_info"]["bot_id"])
+            .execute()
+        )
 
         files = {"file": ("test.txt", sample_txt_file, "text/plain")}
-        data = {
-            "doc_name": "test"
-        }
+        data = {"doc_name": "test"}
 
         create_doc_response = client.post(
             f"{API_PREFIX}/bots/{bot["bot_info"]["bot_id"]}/documents",
             files=files,
             data=data,
-            headers=auth_headers
+            headers=auth_headers,
         )
 
         assert create_doc_response.status_code == status.HTTP_201_CREATED
         doc = create_doc_response.json()
-        db_doc = supabase_admin.table("documents").select("*").eq("bot_id", doc["bot_id"]).eq("doc_id", doc["doc_id"]).execute().data
+        db_doc = (
+            supabase_admin.table("documents")
+            .select("*")
+            .eq("bot_id", doc["bot_id"])
+            .eq("doc_id", doc["doc_id"])
+            .execute()
+            .data
+        )
         assert len(db_doc) == 1
-        doc_list = supabase_admin.storage.from_("documents").list(f"documents/{doc['bot_id']}/")
+        doc_list = supabase_admin.storage.from_("documents").list(
+            f"documents/{doc['bot_id']}/"
+        )
         assert len(doc_list) > 0
         file_names = [f["name"] for f in doc_list]
         assert doc["file_name"] in file_names
 
         vectors_response = get_all_vector_embeddings_by_doc_id(
-            doc["bot_id"],
-            doc["doc_id"]
+            doc["bot_id"], doc["doc_id"]
         )
 
         assert len(vectors_response) > 0

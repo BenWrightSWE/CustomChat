@@ -8,9 +8,7 @@ router = APIRouter()
 
 @router.post("/", response_model=FeedbackResponse, status_code=status.HTTP_201_CREATED)
 def create_feedback(
-    bot_id: int,
-    fb_data: FeedbackCreate,
-    _: dict = Depends(verify_bot_ownership)
+    bot_id: int, fb_data: FeedbackCreate, _: dict = Depends(verify_bot_ownership)
 ):
     try:
         return crud.create_feedback(bot_id, fb_data)
@@ -18,7 +16,7 @@ def create_feedback(
         print(f"Error creating feedback: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error while creating feedback"
+            detail="Internal server error while creating feedback",
         )
 
 
@@ -28,7 +26,10 @@ def get_all_feedback(bot_id: int, _: dict = Depends(verify_bot_ownership)):
         return crud.get_all_feedback(bot_id)
     except Exception as e:
         print(f"Error fetching feedback: {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error while getting all feedback for bot")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error while getting all feedback for bot",
+        )
 
 
 @router.get("/{fb_id}", response_model=FeedbackResponse)
@@ -38,11 +39,16 @@ def get_feedback_by_id(
     try:
         feedback = crud.get_feedback_by_id(bot_id, fb_id)
         if not feedback:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Feedback not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Feedback not found"
+            )
 
         return feedback
     except HTTPException:
         raise
     except Exception as e:
         print(f"Error fetching feedback: {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error while getting feedback by id")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error while getting feedback by id",
+        )

@@ -13,17 +13,12 @@ class EmbedClient:
 
     def embed_document(self, texts):
         """embeddings for a list of strings"""
-        formatted_texts = [
-            "search_document: " + text
-            for text in texts
-        ]
+        formatted_texts = ["search_document: " + text for text in texts]
         return self.model.encode(formatted_texts)
 
     def embed_text(self, text):
         """embedding for specifically a single string. This is different than user input due to formatting."""
-        formatted_text = [
-            "search_document: " + text
-        ]
+        formatted_text = ["search_document: " + text]
         return self.model.encode(formatted_text)
 
     def embed_input(self, text):

@@ -7,7 +7,7 @@ from app.schemas.embed import (
     DocumentEmbedResponse,
     UserInputEmbedResponse,
     EmbedObject,
-    StringRequest
+    StringRequest,
 )
 
 router = APIRouter()
@@ -17,25 +17,27 @@ router = APIRouter()
 def embed_user_input(request: UserInputRequest):
     try:
         embedding = main.embed_client.embed_input(request.user_input)
-        return UserInputEmbedResponse(chunk=request.user_input, embedding=embedding.tolist())
+        return UserInputEmbedResponse(
+            chunk=request.user_input, embedding=embedding.tolist()
+        )
     except HTTPException:
         raise
     except Exception as e:
         print(e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error while embedding user input"
+            detail="Internal server error while embedding user input",
         )
 
 
 @router.post("/txt", response_model=DocumentEmbedResponse)
 def embed_txt_document(request: TxtDocumentRequest):
     try:
-        doc_size = len(request.document.encode('utf-8'))
+        doc_size = len(request.document.encode("utf-8"))
         if doc_size > settings.MAX_DOCUMENT_SIZE_BYTES:
             raise HTTPException(
                 status_code=status.HTTP_413_CONTENT_TOO_LARGE,
-                detail=f"Document exceeds {settings.MAX_DOCUMENT_SIZE_MB}MB limit"
+                detail=f"Document exceeds {settings.MAX_DOCUMENT_SIZE_MB}MB limit",
             )
 
         chunks = main.chunk_client.chunk_document(request.document)
@@ -52,7 +54,7 @@ def embed_txt_document(request: TxtDocumentRequest):
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Internal server error while embedding document"
+            detail=f"Internal server error while embedding document",
         )
 
 
@@ -69,7 +71,7 @@ def embed_string(request: StringRequest):
         if len(request.string) > settings.MAX_STRING_SIZE_CHAR:
             raise HTTPException(
                 status_code=status.HTTP_413_CONTENT_TOO_LARGE,
-                detail=f"String exceeds {settings.MAX_STRING_SIZE_CHAR} char limit"
+                detail=f"String exceeds {settings.MAX_STRING_SIZE_CHAR} char limit",
             )
         embed_result = main.embed_client.embed_text(request.string)
         return EmbedObject(chunk=request.string, embedding=embed_result[0])
@@ -79,5 +81,5 @@ def embed_string(request: StringRequest):
         print(e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error while embedding string"
+            detail="Internal server error while embedding string",
         )

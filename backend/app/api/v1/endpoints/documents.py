@@ -1,4 +1,13 @@
-from fastapi import APIRouter, HTTPException, Depends, UploadFile, BackgroundTasks, Form, File, status
+from fastapi import (
+    APIRouter,
+    HTTPException,
+    Depends,
+    UploadFile,
+    BackgroundTasks,
+    Form,
+    File,
+    status,
+)
 from fastapi.responses import FileResponse
 from app.schemas.documents import DocumentCreate, DocumentResponse
 from app.schemas.vectors import VectorCreate
@@ -9,11 +18,11 @@ from app.utils.storage import (
     upload_file_to_storage,
     download_file_from_storage,
     delete_file_from_storage,
-    get_document_storage_path
+    get_document_storage_path,
 )
 from app.utils.documents import (
     get_document_and_storage_path_by_id,
-    get_txt_document_embed_data_from_api
+    get_txt_document_embed_data_from_api,
 )
 import tempfile
 import os
@@ -32,9 +41,8 @@ ALLOWED_CONTENT_TYPES = {
 
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
 
-@router.post(
-    "/", response_model=DocumentResponse, status_code=status.HTTP_201_CREATED
-)
+
+@router.post("/", response_model=DocumentResponse, status_code=status.HTTP_201_CREATED)
 async def create_document(
     bot_id: int,
     doc_name: str = Form(...),
@@ -57,7 +65,7 @@ async def create_document(
             doc_name=doc_name,
             file_name=file.filename,
             doc_type=file.content_type,
-            doc_size=len(file_content)
+            doc_size=len(file_content),
         )
 
         existing = crud.get_document_by_filename(bot_id, file.filename)
@@ -73,11 +81,11 @@ async def create_document(
             )
 
             # creates document in relational db
-            rdb_doc = crud.create_document(
-                bot_id, doc_data
-            )
+            rdb_doc = crud.create_document(bot_id, doc_data)
 
-            embed_data = get_txt_document_embed_data_from_api(file_content.decode("utf-8"))
+            embed_data = get_txt_document_embed_data_from_api(
+                file_content.decode("utf-8")
+            )
 
             # Convert to VectorCreate objects
             vector_objects = [
@@ -92,7 +100,10 @@ async def create_document(
         raise
     except Exception as e:
         print(f"Error creating document: {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error while creating document")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error while creating document",
+        )
 
 
 @router.get("/", response_model=list[DocumentResponse])
@@ -101,7 +112,10 @@ def get_all_documents(bot_id: int, _: dict = Depends(verify_bot_ownership)):
         return crud.get_all_documents(bot_id)
     except Exception as e:
         print(f"Error fetching document: {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error while getting all documents for bot")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error while getting all documents for bot",
+        )
 
 
 @router.get("/{doc_id}", response_model=DocumentResponse)
@@ -111,13 +125,18 @@ def get_document_by_id(
     try:
         feedback = crud.get_document_by_id(bot_id, doc_id)
         if not feedback:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Document not found"
+            )
         return feedback
     except HTTPException:
         raise
     except Exception as e:
         print(f"Error fetching document: {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error while getting document by id")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error while getting document by id",
+        )
 
 
 @router.get("/{doc_id}/download", response_class=FileResponse)
@@ -131,7 +150,9 @@ def download_document_by_id(
         db_doc, storage_path = get_document_and_storage_path_by_id(bot_id, doc_id)
 
         if not db_doc:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Document not found"
+            )
 
         doc_bytes = download_file_from_storage(storage_path)
 
@@ -154,7 +175,10 @@ def download_document_by_id(
         raise
     except Exception as e:
         print(f"Error fetching document: {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error while downloading document by id")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error while downloading document by id",
+        )
 
 
 @router.delete(
@@ -168,7 +192,9 @@ async def delete_document_by_id(
         db_doc, storage_path = get_document_and_storage_path_by_id(bot_id, doc_id)
 
         if not db_doc:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Document not found"
+            )
 
         crud.delete_document_by_id(bot_id, doc_id)  # deletes from relational db
 
@@ -179,4 +205,7 @@ async def delete_document_by_id(
         raise
     except Exception as e:
         print(f"Error fetching document: {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error while deleting document by id")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error while deleting document by id",
+        )

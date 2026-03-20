@@ -15,6 +15,7 @@ from app.api.deps import get_api_key
 chunk_client = None
 embed_client = None
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global chunk_client, embed_client
@@ -28,6 +29,7 @@ async def lifespan(app: FastAPI):
 
     print("Shutting down Embed API")
 
+
 app = FastAPI(title="Embed API", version="1.0.0", lifespan=lifespan)
 
 app.add_middleware(
@@ -39,10 +41,7 @@ app.add_middleware(
 )
 
 app.include_router(
-    api_router,
-    prefix="/api/v1",
-    tags=["Embed"],
-    dependencies=[Depends(get_api_key)]
+    api_router, prefix="/api/v1", tags=["Embed"], dependencies=[Depends(get_api_key)]
 )
 
 

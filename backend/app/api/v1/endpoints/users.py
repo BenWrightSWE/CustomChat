@@ -15,7 +15,10 @@ def get_user_profile(current_user: dict = Depends(get_current_user)):
         return user
     except Exception as e:
         print(f"Error fetching user: {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error while getting user profile")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error while getting user profile",
+        )
 
 
 @router.patch("/", response_model=UserResponse)
@@ -36,20 +39,24 @@ def update_current_user(
         raise
     except Exception as e:
         print(f"Error updating user: {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error while updating user profile")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error while updating user profile",
+        )
 
 
 @router.patch("/email")
 def update_user_email(
-    email_data: EmailUpdate,
-    current_user: dict = Depends(get_current_user)
+    email_data: EmailUpdate, current_user: dict = Depends(get_current_user)
 ):
     try:
         supabase_admin.auth.admin.update_user_by_id(
-            current_user["id"],
-            {"email": str(email_data.email)}
+            current_user["id"], {"email": str(email_data.email)}
         )
         return {"message": "Email updated successfully"}
     except Exception as e:
         print(f"Error updating user: {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error while updating user email")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error while updating user email",
+        )

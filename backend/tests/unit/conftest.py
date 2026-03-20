@@ -13,10 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.router import api_router
 from app.crud.vectors import get_vector_neighbors
 from app.schemas.vectors import VectorSearchResponse, VectorSearchItem
-from app.utils.assistant import (
-    get_api_embedding,
-    get_llm_api_response
-)
+from app.utils.assistant import get_api_embedding, get_llm_api_response
 from app.utils.documents import get_txt_document_embed_data_from_api
 from supabase import create_client
 
@@ -41,11 +38,11 @@ async def test_lifespan(app):
     yield
 
 
-
-
 @pytest.fixture
 def app():
-    test_app = FastAPI(title="Mock CustomChat API", version="1.0.0", lifespan=test_lifespan)
+    test_app = FastAPI(
+        title="Mock CustomChat API", version="1.0.0", lifespan=test_lifespan
+    )
 
     test_app.add_middleware(
         CORSMiddleware,
@@ -60,7 +57,9 @@ def app():
     test_app.dependency_overrides[get_api_embedding] = lambda: MockServices()
     test_app.dependency_overrides[get_llm_api_response] = lambda: MockServices()
     test_app.dependency_overrides[get_vector_neighbors] = lambda: MockServices()
-    test_app.dependency_overrides[get_txt_document_embed_data_from_api] = lambda: MockServices()
+    test_app.dependency_overrides[get_txt_document_embed_data_from_api] = (
+        lambda: MockServices()
+    )
 
     return test_app
 
@@ -72,32 +71,32 @@ def client(app, mocker):
     """
     mocker.patch(
         "app.api.v1.endpoints.assistant.get_api_embedding",
-        return_value=SAMPLE_EMBEDDING
+        return_value=SAMPLE_EMBEDDING,
     )
     mocker.patch(
         "app.api.v1.endpoints.assistant.get_llm_api_response",
-        return_value="Test llm assistant response!"
+        return_value="Test llm assistant response!",
     )
     mocker.patch(
         "app.api.v1.endpoints.assistant.get_vector_neighbors",
         return_value=VectorSearchResponse(
-                neighbors=[
-                    VectorSearchItem(vec_id=1, context="Context number one."),
-                    VectorSearchItem(vec_id=2, context="Context number two."),
-                    VectorSearchItem(vec_id=3, context="Context number three."),
-                    VectorSearchItem(vec_id=4, context="Context number four."),
-                    VectorSearchItem(vec_id=5, context="Context number five.")
-                ]
-        )
+            neighbors=[
+                VectorSearchItem(vec_id=1, context="Context number one."),
+                VectorSearchItem(vec_id=2, context="Context number two."),
+                VectorSearchItem(vec_id=3, context="Context number three."),
+                VectorSearchItem(vec_id=4, context="Context number four."),
+                VectorSearchItem(vec_id=5, context="Context number five."),
+            ]
+        ),
     )
     mocker.patch(
         "app.api.v1.endpoints.documents.get_document_embed_data_from_api",
         return_value={
             "embedding_objects": [
                 {"chunk": "This is chunk one.", "embedding": SAMPLE_EMBEDDING},
-                {"chunk": "This is chunk two.", "embedding": SAMPLE_EMBEDDING}
+                {"chunk": "This is chunk two.", "embedding": SAMPLE_EMBEDDING},
             ]
-        }
+        },
     )
 
     with TestClient(app) as client:
@@ -121,17 +120,19 @@ def ensure_test_user_exists():
     supabase = create_client(url, service_key)
 
     try:
-        supabase.auth.admin.create_user({
-            "email": TEST_USER_EMAIL,
-            "password": TEST_USER_PASSWORD,
-            "email_confirm": True,
-            "user_metadata": {
-                "first_name": "John",
-                "last_name": "Doe",
-                "company":  "DoubleOSeven",
-                "phone": "1234567890"
+        supabase.auth.admin.create_user(
+            {
+                "email": TEST_USER_EMAIL,
+                "password": TEST_USER_PASSWORD,
+                "email_confirm": True,
+                "user_metadata": {
+                    "first_name": "John",
+                    "last_name": "Doe",
+                    "company": "DoubleOSeven",
+                    "phone": "1234567890",
+                },
             }
-        })
+        )
         print(f"Created test user: {TEST_USER_EMAIL}")
     except Exception as e:
         if "already" in str(e).lower():
@@ -156,10 +157,9 @@ def auth_token(supabase_test_client):
     Signs in as the test user and returns the JWT token.
     """
     try:
-        response = supabase_test_client.auth.sign_in_with_password({
-            "email": TEST_USER_EMAIL,
-            "password": TEST_USER_PASSWORD
-        })
+        response = supabase_test_client.auth.sign_in_with_password(
+            {"email": TEST_USER_EMAIL, "password": TEST_USER_PASSWORD}
+        )
         return response.session.access_token
     except Exception as e:
         pytest.fail(
@@ -186,6 +186,7 @@ def test_user_id(supabase_test_client, auth_token):
     """Get the test user's ID."""
     user = supabase_test_client.auth.get_user(auth_token)
     return user.user.id
+
 
 # Sample File Fixtures
 
@@ -247,7 +248,7 @@ def sample_bot_data():
         "avatar": "base",
         "color": "tan",
         "storage": 0,
-        "uses": 0
+        "uses": 0,
     }
 
 
@@ -259,7 +260,7 @@ def sample_feedback_data():
         "fb_time": "10:30:15",
         "fb_desc": "Sample feedback data!",
         "is_neg": True,
-        "use_log": None
+        "use_log": None,
     }
 
 
@@ -268,16 +269,10 @@ def sample_assistant_request():
     """Provides sample assistant request for llm response, need to add ["bot_api_key"]"""
     return {
         "chat_history": [
-            {
-                "role": "USER",
-                "message": "Is this a test question?"
-            },
-            {
-                "role": "ASSISTANT",
-                "message": "Yes it is a test question?"
-            }
+            {"role": "USER", "message": "Is this a test question?"},
+            {"role": "ASSISTANT", "message": "Yes it is a test question?"},
         ],
-        "user_input": "What is an llm bot response?"
+        "user_input": "What is an llm bot response?",
     }
 
 
@@ -287,12 +282,16 @@ def sample_assistant_request():
 @pytest.fixture
 def created_bot(client, auth_headers, sample_bot_data):
     """Creates a test bot and return its values."""
-    response = client.post(f"{API_PREFIX}/bots", json=sample_bot_data, headers=auth_headers)
+    response = client.post(
+        f"{API_PREFIX}/bots", json=sample_bot_data, headers=auth_headers
+    )
     bot = response.json()
 
     yield bot
 
-    client.delete(f"{API_PREFIX}/bots/{bot["bot_info"]["bot_id"]}", headers=auth_headers)
+    client.delete(
+        f"{API_PREFIX}/bots/{bot["bot_info"]["bot_id"]}", headers=auth_headers
+    )
 
 
 @pytest.fixture
@@ -307,7 +306,7 @@ def created_document(client, auth_headers, created_bot, sample_txt_file):
         f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}/documents",
         files=files,
         data=data,
-        headers=auth_headers
+        headers=auth_headers,
     )
     document = response.json()
 
@@ -316,13 +315,14 @@ def created_document(client, auth_headers, created_bot, sample_txt_file):
     try:
         client.delete(
             f"{API_PREFIX}/bots/{created_bot["bot_info"]["bot_id"]}/documents/{document['doc_id']}",
-            headers=auth_headers
+            headers=auth_headers,
         )
     except Exception:
         pass  # Document might already be deleted by the test
 
 
 # Utility Fixtures
+
 
 @pytest.fixture(scope="session")
 def test_config():

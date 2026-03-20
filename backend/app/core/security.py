@@ -12,7 +12,7 @@ security = HTTPBearer()
 jwks_client = PyJWKClient(
     os.getenv(
         "SUPABASE_JWKS_URL", "http://127.0.0.1:54321/auth/v1/.well-known/jwks.json"
-    ) # checks for the value in the ENV, if it doesn't occur in the file, it assumes the second param.
+    )  # checks for the value in the ENV, if it doesn't occur in the file, it assumes the second param.
 )
 
 

@@ -1,8 +1,5 @@
 from fastapi import APIRouter, status, HTTPException, Depends
-from app.schemas.llm import (
-    LLMRequest,
-    LLMResponse
-)
+from app.schemas.llm import LLMRequest, LLMResponse
 from app.core.llm_client import LLMClient, get_llm
 
 MAX_INPUT_CONTEXT = 5
@@ -10,8 +7,11 @@ MAX_INPUT_CONTEXT = 5
 
 router = APIRouter()
 
+
 @router.post("/response", response_model=LLMResponse)
-def llm_response_with_context(input_data: LLMRequest, llm_client: LLMClient = Depends(get_llm)):
+def llm_response_with_context(
+    input_data: LLMRequest, llm_client: LLMClient = Depends(get_llm)
+):
     """Context refers to a list of strings that give context or details to the answer being provided by the llm"""
     if not input_data.user_input.strip():
         raise HTTPException(

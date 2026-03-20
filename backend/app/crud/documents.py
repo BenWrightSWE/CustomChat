@@ -12,7 +12,9 @@ def create_document(bot_id: int, doc_data: DocumentCreate):
 
 
 def get_all_documents(bot_id: int):
-    response = supabase_admin.table("documents").select("*").eq("bot_id", bot_id).execute()
+    response = (
+        supabase_admin.table("documents").select("*").eq("bot_id", bot_id).execute()
+    )
     return response.data
 
 
@@ -27,7 +29,9 @@ def get_document_by_id(bot_id: int, doc_id: int):
     )
 
     if response is None or response.data is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Document not found"
+        )
 
     return response.data
 
