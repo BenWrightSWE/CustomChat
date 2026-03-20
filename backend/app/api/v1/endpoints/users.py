@@ -28,6 +28,7 @@ def update_current_user(
         if not user_update.model_dump(exclude_unset=True):
             raise HTTPException(status_code=400, detail="No update data provided")
 
+        # updates user info in the database & returns the updated values
         crud.update_user_by_user_id(user_id, user_update)
         user = crud.get_user_by_user_id(user_id)
         return user

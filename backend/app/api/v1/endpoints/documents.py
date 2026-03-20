@@ -13,14 +13,14 @@ from app.utils.storage import (
 )
 from app.utils.documents import (
     get_document_and_storage_path_by_id,
-    get_document_embed_data_from_api
+    get_txt_document_embed_data_from_api
 )
 import tempfile
 import os
 
 """
 Should add rollback logic later for create_document and delete_document_by_id. I'm not doing it now because ordering of 
-creating in storage then in db makes it sothat it won't show up to user if it fails and will overwrite if it's just in 
+creating in storage then in db makes it so that it won't show up to user if it fails and will overwrite if it's just in 
 the storage.
 """
 
@@ -72,11 +72,12 @@ async def create_document(
                 storage_path, file_content, file.content_type, upsert="true"
             )
 
+            # creates document in relational db
             rdb_doc = crud.create_document(
                 bot_id, doc_data
-            )  # creates document in relational db
+            )
 
-            embed_data = get_document_embed_data_from_api(file_content.decode("utf-8"))
+            embed_data = get_txt_document_embed_data_from_api(file_content.decode("utf-8"))
 
             # Convert to VectorCreate objects
             vector_objects = [

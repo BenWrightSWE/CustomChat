@@ -2,7 +2,7 @@ from app.schemas.vectors import VectorCreate, SearchableVector, VectorSearchResp
 from app.core.supabase import supabase_admin
 from typing import List
 
-NEIGHBOR_LIMIT = 5
+NEIGHBOR_LIMIT = 5 # In regards to vector nearest neighbor computation.
 
 
 def create_vectors(bot_id: int, doc_id: int, vector_data: List[VectorCreate]):

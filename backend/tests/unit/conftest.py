@@ -17,7 +17,7 @@ from app.utils.assistant import (
     get_api_embedding,
     get_llm_api_response
 )
-from app.utils.documents import get_document_embed_data_from_api
+from app.utils.documents import get_txt_document_embed_data_from_api
 from supabase import create_client
 
 from io import BytesIO
@@ -60,7 +60,7 @@ def app():
     test_app.dependency_overrides[get_api_embedding] = lambda: MockServices()
     test_app.dependency_overrides[get_llm_api_response] = lambda: MockServices()
     test_app.dependency_overrides[get_vector_neighbors] = lambda: MockServices()
-    test_app.dependency_overrides[get_document_embed_data_from_api] = lambda: MockServices()
+    test_app.dependency_overrides[get_txt_document_embed_data_from_api] = lambda: MockServices()
 
     return test_app
 
@@ -69,10 +69,6 @@ def app():
 def client(app, mocker):
     """
     Creates test client which allows requests to the endpoints without starting a server
-
-    Usage:
-        def test_something(client):
-            response = client.get("/endpoint")
     """
     mocker.patch(
         "app.api.v1.endpoints.assistant.get_api_embedding",
@@ -181,14 +177,7 @@ def auth_headers(auth_token):
 
 @pytest.fixture
 def invalid_auth_headers():
-    """
-    Provides invalid authentication headers for testing auth failures.
-
-    Usage:
-        def test_unauthorized(client, invalid_auth_headers):
-            response = client.get("/protected", headers=invalid_auth_headers)
-            assert response.status_code == status.HTTP_401_UNAUTHORIZED
-    """
+    """Provides invalid authentication headers for testing auth failures."""
     return {"Authorization": "Bearer invalid_token"}
 
 
@@ -203,14 +192,7 @@ def test_user_id(supabase_test_client, auth_token):
 
 @pytest.fixture
 def sample_txt_file():
-    """
-    Returns a BytesIO object that can be used as a file upload as a sample text file for upload tests.
-
-    Usage:
-        def test_upload(client, auth_headers, sample_txt_file):
-            files = {"file": ("test.txt", sample_txt_file, "text/plain")}
-            response = client.post("/upload", files=files, headers=auth_headers)
-    """
+    """Returns a BytesIO object that can be used as a file upload as a sample text file for upload tests."""
     content = b"This is a test document.\nIt has multiple lines.\nFor testing purposes."
     return BytesIO(content)
 
@@ -250,14 +232,7 @@ def invalid_file_exe():
 
 @pytest.fixture
 def sample_document_data():
-    """
-    Provide sample document metadata for creation.
-
-    Usage:
-        def test_create(client, auth_headers, sample_txt_file, sample_document_data):
-            files = {"file": ("test.txt", sample_txt_file, "text/plain")}
-            response = client.post("/documents", files=files, data=sample_document_data)
-    """
+    """Provide sample document metadata for creation."""
     return {
         "doc_name": "test_document",
     }
@@ -265,9 +240,7 @@ def sample_document_data():
 
 @pytest.fixture
 def sample_bot_data():
-    """
-    Provides sample bot data for creation.
-    """
+    """Provides sample bot data for creation."""
     return {
         "bot_name": "Test Bot",
         "bot_desc": "A bot for testing",
@@ -280,9 +253,7 @@ def sample_bot_data():
 
 @pytest.fixture
 def sample_feedback_data():
-    """
-    Provides sample feedback data for creation.
-    """
+    """Provides sample feedback data for creation."""
     return {
         "fb_date": "2026-01-06",
         "fb_time": "10:30:15",
@@ -294,9 +265,7 @@ def sample_feedback_data():
 
 @pytest.fixture
 def sample_assistant_request():
-    """
-    Provides sample assistant request for llm response, need to add ["bot_api_key"]
-    """
+    """Provides sample assistant request for llm response, need to add ["bot_api_key"]"""
     return {
         "chat_history": [
             {
@@ -317,13 +286,7 @@ def sample_assistant_request():
 
 @pytest.fixture
 def created_bot(client, auth_headers, sample_bot_data):
-    """
-    Creates a test bot and return its values.
-
-    Usage:
-        def test_something(client, auth_headers, test_bot_id):
-            response = client.get(f"/bots/{test_bot_id}")
-    """
+    """Creates a test bot and return its values."""
     response = client.post(f"{API_PREFIX}/bots", json=sample_bot_data, headers=auth_headers)
     bot = response.json()
 
@@ -334,14 +297,7 @@ def created_bot(client, auth_headers, sample_bot_data):
 
 @pytest.fixture
 def created_document(client, auth_headers, created_bot, sample_txt_file):
-    """
-    Creates a test document and return its data. Cleans up after test.
-
-    Usage:
-        def test_get_document(client, auth_headers, created_document):
-            doc_id = created_document["doc_id"]
-            response = client.get(f"/bots/1/documents/{doc_id}")
-    """
+    """Creates a test document and returns its data. Cleans up after test."""
     files = {"file": ("fixture_test.txt", sample_txt_file, "text/plain")}
     data = {
         "doc_name": "fixture_test",

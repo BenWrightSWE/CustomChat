@@ -40,6 +40,9 @@ def client():
 
 @pytest.fixture
 def create_test_user():
+    """
+    Creates a user in the database. Yields the data needed for setting up the auth tokens. Cleans up the user after use.
+    """
     url = os.getenv("SUPABASE_URL")
     service_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 
@@ -79,7 +82,9 @@ def supabase_test_client():
 
 @pytest.fixture
 def auth_token(create_test_user, supabase_test_client):
-
+    """
+    Passed as part of the auth headers.
+    """
     response = supabase_test_client.auth.sign_in_with_password({
         "email": create_test_user["email"],
         "password": create_test_user["password"]
@@ -88,10 +93,12 @@ def auth_token(create_test_user, supabase_test_client):
     return response.session.access_token
 
 
-# This is called by the test, creates the user, logs them in, gets the auth token, and provides the auth headers.
 @pytest.fixture
 def auth_headers(auth_token):
-    """Provide authentication headers for test requests."""
+    """
+    Provide authentication headers for test requests.
+    This is called by the test, creates the user, logs them in, gets the auth token, and provides the auth headers.
+    """
     return {"Authorization": f"Bearer {auth_token}"}
 
 
@@ -101,7 +108,7 @@ def auth_headers(auth_token):
 @pytest.fixture
 def sample_bot_data():
     """
-    Provides sample bot data for creation.
+    Provides sample bot data for bot creation.
     """
     return {
         "bot_name": "Test Bot",
@@ -121,11 +128,6 @@ def sample_bot_data():
 def sample_txt_file():
     """
     Returns a BytesIO object that can be used as a file upload as a sample text file for upload tests.
-
-    Usage:
-        def test_upload(client, auth_headers, sample_txt_file):
-            files = {"file": ("test.txt", sample_txt_file, "text/plain")}
-            response = client.post("/upload", files=files, headers=auth_headers)
     """
     content = b"This is a test document.\nIt has multiple lines.\nFor testing purposes."
     return BytesIO(content)
@@ -181,9 +183,11 @@ def sample_injectable_doc():
     )
 
 
-# gotten using the embedding service model.
 @pytest.fixture
 def sample_injectable_embedding_objects():
+    """
+    Gotten using the embedding service model used by this project.
+    """
     return [
         {
             "chunk": "UGA is located in Athens, GA.",
@@ -770,10 +774,6 @@ def sample_injectable_embedding_objects():
 def created_bot(client, auth_headers, sample_bot_data):
     """
     Creates a test bot and return its ID. Cleans up after test.
-
-    Usage:
-        def test_something(client, auth_headers, test_bot_id):
-            response = client.get(f"/bots/{test_bot_id}")
     """
     response = client.post(f"{API_PREFIX}/bots", json=sample_bot_data, headers=auth_headers)
     bot = response.json()
@@ -786,12 +786,7 @@ def created_bot(client, auth_headers, sample_bot_data):
 @pytest.fixture
 def created_document(client, auth_headers, created_bot, sample_txt_file):
     """
-    Creates a test document and return its data. Cleans up after test.
-
-    Usage:
-        def test_get_document(client, auth_headers, created_document):
-            doc_id = created_document["doc_id"]
-            response = client.get(f"/bots/1/documents/{doc_id}")
+    Creates a test document and returns its data. Cleans up after test.
     """
     files = {"file": ("fixture_test.txt", sample_txt_file, "text/plain")}
     data = {

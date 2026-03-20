@@ -26,8 +26,8 @@ def get_document_and_storage_path_by_id(
     return document, storage_path
 
 
-# Interacting with an API needed for create document endpoint
-def get_document_embed_data_from_api(file_content: str):
+def get_txt_document_embed_data_from_api(file_content: str):
+    """Creates embeddings for a text document using the Embedding Services API"""
     response = requests.post(
         f"{EMBEDDING_API_URL}/embed/txt",
         json={"document": file_content},

@@ -119,12 +119,14 @@ https://docs.docker.com/get-started/get-docker/
 ### Backend
 1. PDF DOCX support
 2. Bot optimization
+3. Verify bot api key when submitting feedback
 3. Delete User, Delete Bot, Delete Doc, clears embeddings & Api key
 4. Maybe fix bucket upload logic? might be document/document/{bot_id}/{file_name}
 5. Fix for consistent object/dict usage when getting responses from endpoints
 6. Fix unit test warnings
 7. Docker usage
 8. Rate limiting
+9. Document endpoint rollback logic (commented in documents endpoint file)
 
 ## <a name="#contrib-acknow">Contributors & Acknowledgements</a>
 

@@ -12,6 +12,7 @@ router = APIRouter()
 
 @router.post("/response", response_model=LLMResponse)
 def llm_response_with_context(input_data: LLMRequest, llm_client: LLMClient = Depends(get_llm)):
+    """Context refers to a list of strings that give context or details to the answer being provided by the llm"""
     if not input_data.user_input.strip():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

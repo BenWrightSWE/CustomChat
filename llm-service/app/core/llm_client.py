@@ -57,6 +57,7 @@ class LLMClient:
             {"role": "system", "content": system_prompt}
         ]
 
+        # gets the most recent chat history starting with a client message
         recent_history = chat_history[-MAX_CONVO_HISTORY:] if len(chat_history) > MAX_CONVO_HISTORY else chat_history
 
         if recent_history and recent_history[0].role == "ASSISTANT":
@@ -72,6 +73,7 @@ class LLMClient:
 
 
 def get_llm() -> LLMClient:
+    """Singleton for the llm so that only one llm instance is created"""
     global _llm_instance
     if _llm_instance is None:
         _llm_instance = LLMClient(MODEL_ID)

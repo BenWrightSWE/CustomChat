@@ -6,6 +6,7 @@ LLM_API_URL = os.getenv("LLM_API_URL")
 
 
 def get_api_embedding(user_input: str) -> list:
+    """Makes embedding of the user input through the use of the Embedding Service API"""
     response = requests.post(
         f"{EMBEDDING_API_URL}/embed/user_input",
         json={"user_input": user_input},

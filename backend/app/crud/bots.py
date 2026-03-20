@@ -7,7 +7,7 @@ def create_bot(user_id: str, bot_data: BotCreate):
     bot_dict = bot_data.model_dump()
     bot_dict["user_id"] = user_id
 
-    method_response = make_and_store_api_key()
+    method_response = make_and_store_api_key() # api key for bot assistant responses
     bot_dict["vault_uuid"] = method_response[1]
 
     db_response = supabase_admin.table("bots").insert(bot_dict).execute()

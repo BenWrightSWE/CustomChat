@@ -32,7 +32,7 @@ def embed_user_input(request: UserInputRequest):
 def embed_txt_document(request: TxtDocumentRequest):
     try:
         doc_size = len(request.document.encode('utf-8'))
-        if doc_size > settings.MAX_DOCUMENT_SIZE:
+        if doc_size > settings.MAX_DOCUMENT_SIZE_BYTES:
             raise HTTPException(
                 status_code=status.HTTP_413_CONTENT_TOO_LARGE,
                 detail=f"Document exceeds {settings.MAX_DOCUMENT_SIZE_MB}MB limit"
