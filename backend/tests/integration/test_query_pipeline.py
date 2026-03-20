@@ -8,18 +8,27 @@ from fastapi import status
 
 class TestQueryPipeline:
     def test_query_pipeline(
-        self, client, auth_headers, sample_bot_data, sample_injectable_doc, sample_injectable_embedding_objects, sample_assistant_request
+        self,
+        client,
+        auth_headers,
+        sample_bot_data,
+        sample_injectable_doc,
+        sample_injectable_embedding_objects,
+        sample_assistant_request,
     ):
         # create a bot
         create_bot_response = client.post(
-            f"{API_PREFIX}/bots",
-            json=sample_bot_data,
-            headers=auth_headers
+            f"{API_PREFIX}/bots", json=sample_bot_data, headers=auth_headers
         )
 
         assert create_bot_response.status_code == status.HTTP_201_CREATED
         bot = create_bot_response.json()
-        assert supabase_admin.table("bots").select("*").eq("bot_id", bot["bot_info"]["bot_id"]).execute()
+        assert (
+            supabase_admin.table("bots")
+            .select("*")
+            .eq("bot_id", bot["bot_info"]["bot_id"])
+            .execute()
+        )
 
         doc_response = create_document(bot["bot_info"]["bot_id"], sample_injectable_doc)
 
@@ -28,14 +37,16 @@ class TestQueryPipeline:
             VectorCreate(context=obj["chunk"], embedding=obj["embedding"])
             for obj in sample_injectable_embedding_objects
         ]
-        create_vectors(bot["bot_info"]["bot_id"], doc_response["doc_id"], vector_objects)
+        create_vectors(
+            bot["bot_info"]["bot_id"], doc_response["doc_id"], vector_objects
+        )
 
         # create response using said vectors
         sample_assistant_request["bot_api_key"] = bot["bot_api_key"]
 
         assistant_response = client.post(
             f"{API_PREFIX}/bots/{bot["bot_info"]["bot_id"]}/assistant",
-            json=sample_assistant_request
+            json=sample_assistant_request,
         )
 
         # check if response has some basis for the response

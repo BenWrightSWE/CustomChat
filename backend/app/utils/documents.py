@@ -20,18 +20,20 @@ def get_document_and_storage_path_by_id(
     """
     document = crud.get_document_by_id(bot_id, doc_id)
     if not document:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Document not found"
+        )
 
     storage_path = f"documents/{bot_id}/{document['file_name']}"
     return document, storage_path
 
 
-# Interacting with an API needed for create document endpoint
-def get_document_embed_data_from_api(file_content: str):
+def get_txt_document_embed_data_from_api(file_content: str):
+    """Creates embeddings for a text document using the Embedding Services API"""
     response = requests.post(
         f"{EMBEDDING_API_URL}/embed/txt",
         json={"document": file_content},
-        headers={"X-API-KEY": os.getenv("EMBEDDING_API_KEY")}
+        headers={"X-API-KEY": os.getenv("EMBEDDING_API_KEY")},
     )
 
     try:

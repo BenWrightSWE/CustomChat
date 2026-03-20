@@ -4,7 +4,7 @@ from app.schemas.bots import (
     BotCreateResponse,
     BotUpdate,
     BotResponse,
-    BotUpdateKeyResponse
+    BotUpdateKeyResponse,
 )
 from app.crud import bots as crud
 from app.core.security import get_current_user, verify_bot_ownership
@@ -17,13 +17,13 @@ router = APIRouter()
 def create_bot(bot_data: BotCreate, current_user: dict = Depends(get_current_user)):
     try:
         response = crud.create_bot(current_user["id"], bot_data)
-        return {
-            "bot_info": response[0],
-            "bot_api_key": response[1]
-        }
+        return {"bot_info": response[0], "bot_api_key": response[1]}
     except Exception as e:
         print(f"Error creating bot: {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error while creating bot")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error while creating bot",
+        )
 
 
 @router.get("/", response_model=list[BotResponse])
@@ -32,7 +32,10 @@ def get_all_bots(current_user: dict = Depends(get_current_user)):
         return crud.get_all_bots(current_user["id"])
     except Exception as e:
         print(f"Error fetching bots: {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error while getting all bots for user")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error while getting all bots for user",
+        )
 
 
 @router.get("/{bot_id}", response_model=BotResponse)
@@ -40,13 +43,18 @@ def get_bot_by_id(bot_id: int, current_user: dict = Depends(get_current_user)):
     try:
         response = crud.get_bot_by_id(current_user["id"], bot_id)
         if not response:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bot not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Bot not found"
+            )
         return response
     except HTTPException:
         raise
     except Exception as e:
         print(f"Error fetching bot: {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error while getting bot by id")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error while getting bot by id",
+        )
 
 
 @router.patch("/{bot_id}", response_model=BotResponse)
@@ -63,13 +71,18 @@ def update_bot_by_id(
 
         bot = crud.update_bot_by_id(current_user["id"], bot_id, update_data)
         if not bot:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bot not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Bot not found"
+            )
         return bot
     except HTTPException:
         raise
     except Exception as e:
         print(f"Error updating bot: {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error",
+        )
 
 
 @router.patch("/{bot_id}/api_key", response_model=BotUpdateKeyResponse)
@@ -79,13 +92,13 @@ def update_bot_api_key(
 ):
     try:
         vault_uuid = crud.get_vault_uuid(bot_id)
-        return {
-            "bot_id": bot_id,
-            "bot_api_key": make_and_update_api_key(vault_uuid)
-        }
+        return {"bot_id": bot_id, "bot_api_key": make_and_update_api_key(vault_uuid)}
     except Exception as e:
         print(f"Error updating bot API key: {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error while deleting bot by id")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error while deleting bot by id",
+        )
 
 
 @router.delete("/{bot_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -99,4 +112,7 @@ def delete_bot_by_id(
         return None
     except Exception as e:
         print(f"Error deleting bot: {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error while deleting bot by id")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error while deleting bot by id",
+        )

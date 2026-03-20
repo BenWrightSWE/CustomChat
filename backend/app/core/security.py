@@ -12,7 +12,7 @@ security = HTTPBearer()
 jwks_client = PyJWKClient(
     os.getenv(
         "SUPABASE_JWKS_URL", "http://127.0.0.1:54321/auth/v1/.well-known/jwks.json"
-    )
+    )  # checks for the value in the ENV, if it doesn't occur in the file, it assumes the second param.
 )
 
 
@@ -55,11 +55,7 @@ def get_current_user(
 def verify_bot_ownership(
     bot_id: int = Path(...), current_user: dict = Depends(get_current_user)
 ):
-    """
-    Verifies the bot belongs to the current user
-
-    Raises HTTPException if the bot does not belong to the user.
-    """
+    """Verifies the bot belongs to the current user"""
     bot = bot_crud.get_bot_by_id(current_user["id"], bot_id)
     if not bot:
         raise HTTPException(

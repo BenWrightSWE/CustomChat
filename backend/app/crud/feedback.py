@@ -11,7 +11,9 @@ def create_feedback(bot_id: int, fb_data: FeedbackCreate):
 
 
 def get_all_feedback(bot_id: int):
-    response = supabase_admin.table("feedback").select("*").eq("bot_id", bot_id).execute()
+    response = (
+        supabase_admin.table("feedback").select("*").eq("bot_id", bot_id).execute()
+    )
     return response.data
 
 

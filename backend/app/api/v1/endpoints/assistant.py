@@ -4,16 +4,10 @@ from app.schemas.assistant import (
     AssistantResponse,
     AssistantRequest,
 )
-from app.utils.assistant import (
-    get_api_embedding,
-    get_llm_api_response
-)
+from app.utils.assistant import get_api_embedding, get_llm_api_response
 from app.utils.vault import verify_api_key
 from app.crud.vectors import get_vector_neighbors
-from app.crud.bots import (
-    does_bot_exist,
-    get_vault_uuid
-)
+from app.crud.bots import does_bot_exist, get_vault_uuid
 
 router = APIRouter()
 
@@ -23,12 +17,16 @@ def bot_contextual_response(bot_id: int, request_data: AssistantRequest):
     try:
 
         if not does_bot_exist(bot_id):
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bot not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Bot not found"
+            )
 
         passed_values = request_data.model_dump()
 
         if not verify_api_key(passed_values["bot_api_key"], get_vault_uuid(bot_id)):
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid API key")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid API key"
+            )
 
         user_input_vector = SearchableVector(
             embedding=get_api_embedding(passed_values["user_input"])
@@ -46,8 +44,8 @@ def bot_contextual_response(bot_id: int, request_data: AssistantRequest):
             message=get_llm_api_response(
                 passed_values["chat_history"],
                 context_strings,
-                passed_values["user_input"]
-            )
+                passed_values["user_input"],
+            ),
         )
 
     except HTTPException:
@@ -56,7 +54,5 @@ def bot_contextual_response(bot_id: int, request_data: AssistantRequest):
         print(f"Error fetching LLM response: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error while getting bot response"
+            detail="Internal server error while getting bot response",
         )
-
-    # think about adding bot_id to an API_key

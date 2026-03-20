@@ -4,6 +4,7 @@ from typing import List
 
 # USED FOR VECTOR CREATION
 
+
 class VectorBase(BaseModel):
     context: str
     embedding: List[float]
@@ -23,6 +24,7 @@ class VectorCreateResponse(VectorBase):
 
 
 # USED FOR VECTOR RETRIEVAL
+
 
 class SearchableVector(BaseModel):
     embedding: List[float]

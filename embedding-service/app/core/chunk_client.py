@@ -10,17 +10,22 @@ _chunker_instance = None
 
 class ChunkClient:
     def __init__(self):
-        self.neox_chunker = semchunk.chunkerify("EleutherAI/gpt-neox-20b", CHUNK_SIZE) or \
-            semchunk.chunkerify(AutoTokenizer.from_pretrained("EleutherAI/gpt-neox-20b"), CHUNK_SIZE) or \
-            semchunk.chunkerify(lambda text: len(text.split()), CHUNK_SIZE)
+        """specifies the model the chunker chunks based on"""
+        self.neox_chunker = (
+            semchunk.chunkerify("EleutherAI/gpt-neox-20b", CHUNK_SIZE)
+            or semchunk.chunkerify(
+                AutoTokenizer.from_pretrained("EleutherAI/gpt-neox-20b"), CHUNK_SIZE
+            )
+            or semchunk.chunkerify(lambda text: len(text.split()), CHUNK_SIZE)
+        )
 
     def chunk_document(self, document_text):
         return self.neox_chunker(document_text)
 
 
 def get_chunker() -> ChunkClient:
+    """Singleton for the chunker so that only one chunker instance is created"""
     global _chunker_instance
     if _chunker_instance is None:
         _chunker_instance = ChunkClient()
     return _chunker_instance
-

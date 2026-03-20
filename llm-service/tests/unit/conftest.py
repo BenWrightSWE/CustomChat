@@ -41,10 +41,7 @@ def app():
     )
 
     test_app.include_router(
-        api_router,
-        prefix="/api/v1",
-        tags=["llm"],
-        dependencies=[Depends(get_api_key)]
+        api_router, prefix="/api/v1", tags=["llm"], dependencies=[Depends(get_api_key)]
     )
 
     test_app.dependency_overrides[get_llm] = lambda: MockLLM()
@@ -78,9 +75,11 @@ def sample_context():
     """
     Returns a string array which holds the context for the users question.
     """
-    return ["TestCorp\'s headquarters is located in Atlanta, Georgia, near the Georgia Aquarium.",
-            "TestCorp\'s testing facility is located in Duluth, Georgia, near the HMart.",
-            "TestCorp\'s satellite office is in Chicago, Illinois near the lake."]
+    return [
+        "TestCorp's headquarters is located in Atlanta, Georgia, near the Georgia Aquarium.",
+        "TestCorp's testing facility is located in Duluth, Georgia, near the HMart.",
+        "TestCorp's satellite office is in Chicago, Illinois near the lake.",
+    ]
 
 
 @pytest.fixture
@@ -89,11 +88,20 @@ def sample_history():
     Returns a string including the previous chat history.
     """
     return [
-        {"role": "ASSISTANT", "message": "Hello, I am TestCorp\'s chat assistant, Tester. I am here to answer any "
-                                         "questions you have regarding our company to the best of my ability. "
-                                         "What can I do for you today?"},
-        {"role": "USER", "message": "Hello Tester, I was wondering what time you guys are generally open?"},
-        {"role": "ASSISTANT", "message": "Sure! TestCorp is generally open from 5:00am to 7:00pm."}
+        {
+            "role": "ASSISTANT",
+            "message": "Hello, I am TestCorp's chat assistant, Tester. I am here to answer any "
+            "questions you have regarding our company to the best of my ability. "
+            "What can I do for you today?",
+        },
+        {
+            "role": "USER",
+            "message": "Hello Tester, I was wondering what time you guys are generally open?",
+        },
+        {
+            "role": "ASSISTANT",
+            "message": "Sure! TestCorp is generally open from 5:00am to 7:00pm.",
+        },
     ]
 
 

@@ -33,13 +33,10 @@ app.add_middleware(
 )
 
 app.include_router(
-    api_router,
-    prefix="/api/v1",
-    tags=["llm"],
-    dependencies=[Depends(get_api_key)]
+    api_router, prefix="/api/v1", tags=["llm"], dependencies=[Depends(get_api_key)]
 )
 
 
-@app.get("/")
-async def ping():
-    return {"message": "pong"}
+@app.get("/health")
+def health():
+    return {"status": "ok"}

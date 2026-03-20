@@ -11,6 +11,7 @@ import os
 
 API_PREFIX = "/api/v1"
 
+
 @pytest.fixture
 def client():
     """
@@ -76,6 +77,6 @@ def sample_large_string():
 @pytest.fixture
 def test_api_key():
     """
-        Returns the API key that allows use of the API.
+    Returns the API key that allows use of the API.
     """
     return {"X-API-KEY": os.getenv("EMBEDDING_API_KEY")}
