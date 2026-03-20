@@ -90,7 +90,7 @@ def client(app, mocker):
         ),
     )
     mocker.patch(
-        "app.api.v1.endpoints.documents.get_document_embed_data_from_api",
+        "app.api.v1.endpoints.documents.get_txt_document_embed_data_from_api",
         return_value={
             "embedding_objects": [
                 {"chunk": "This is chunk one.", "embedding": SAMPLE_EMBEDDING},
